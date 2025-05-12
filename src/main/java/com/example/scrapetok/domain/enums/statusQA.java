@@ -1,4 +1,4 @@
-package com.example.scrapetok.entity.enums;
+package com.example.scrapetok.domain.enums;
 
 public enum statusQA {
     PENDING, ANSWERED;

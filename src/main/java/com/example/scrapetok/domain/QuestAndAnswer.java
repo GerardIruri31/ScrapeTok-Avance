@@ -1,6 +1,6 @@
-package com.example.scrapetok.entity;
+package com.example.scrapetok.domain;
 
-import com.example.scrapetok.entity.enums.statusQA;
+import com.example.scrapetok.domain.enums.statusQA;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.sql.Time;

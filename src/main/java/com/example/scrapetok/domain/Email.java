@@ -1,4 +1,4 @@
-package com.example.scrapetok.entity;
+package com.example.scrapetok.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;

@@ -1,4 +1,5 @@
-package com.example.scrapetok.entity;
+package com.example.scrapetok.domain;
+
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,14 +10,15 @@ import java.util.Date;
 @Data
 @Entity
 
-public class UserTiktokMetrics {
+public class AdminTiktokMetrics {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
+
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserAccount user;
+    @JoinColumn(name = "admin_id")
+    private AdminAccount admin;
     @Column(nullable = false)
     private Long postId;
     @Column(nullable = false)
