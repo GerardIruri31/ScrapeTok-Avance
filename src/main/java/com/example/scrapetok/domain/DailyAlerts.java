@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,9 +29,9 @@ public class DailyAlerts {
     @Column(nullable = false)
     private String body;
     @Column(nullable = false)
-    private Date postedDate;
+    private LocalDate postedDate;
     @Column(nullable = false)
-    private Time postedTime;
+    private LocalTime postedTime;
     @OneToMany(mappedBy = "alert", cascade = CascadeType.ALL)
     private List<Email> emails = new ArrayList<>();
 }

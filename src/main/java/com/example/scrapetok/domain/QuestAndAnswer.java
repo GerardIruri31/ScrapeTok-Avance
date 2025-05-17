@@ -4,6 +4,8 @@ import com.example.scrapetok.domain.enums.statusQA;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 
 @Data
@@ -29,10 +31,10 @@ public class QuestAndAnswer {
     @Column(nullable = false)
     private String questionDescription;
     @Column(nullable = false)
-    private Date questionDate;
+    private LocalDate questionDate;
     @Column(nullable = false)
-    private Time questionHour;
+    private LocalTime questionHour;
     private String answerDescription;
-    private Date answerDate;
-    private Time answerHour;
+    private LocalDate answerDate;
+    private LocalTime  answerHour;
 }

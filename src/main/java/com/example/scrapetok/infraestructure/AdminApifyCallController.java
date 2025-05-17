@@ -1,6 +1,8 @@
 package com.example.scrapetok.infraestructure;
 
+import com.example.scrapetok.application.AdminApifyCallService;
 import com.example.scrapetok.application.UserApifyCallService;
+import com.example.scrapetok.domain.DTO.AdminFilterDTO;
 import com.example.scrapetok.domain.DTO.UserFiltersDTO;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -13,25 +15,25 @@ import java.io.IOException;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/admin")
 @CrossOrigin(origins = "*")
-public class UserApifyCallController {
+public class AdminApifyCallController {
     @Autowired
-    private UserApifyCallService userApifyCallService;
+    private AdminApifyCallService AdminApifyCallService;
 
     @PostMapping("/apifycall")
-    public ResponseEntity<?> makeApifyCall(@RequestBody @Valid UserFiltersDTO request) {
+    public ResponseEntity<?> makeApifyCall(@RequestBody @Valid AdminFilterDTO request) {
         try {
             // Retorna List<Map<String,Object>
-            return ResponseEntity.ok(userApifyCallService.apifyconnection(request));
+            return ResponseEntity.ok(AdminApifyCallService.apifyconnection(request));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("Apify Error", "Could not connect to the Apify server. Please try again."));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("Server Error", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("Server Error", e.getMessage()));
         }
     }
 }

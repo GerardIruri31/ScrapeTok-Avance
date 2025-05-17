@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -18,18 +18,17 @@ public class AdminAccount extends GeneralAccount {
     @Column(nullable = false)
     private String lastName;
     @Column(nullable = false)
-    private Date admisionToAdminDate;
+    private LocalDate admisionToAdminDate;
     @Column(nullable = false)
-    private Time admisionToAdminTime;
+    private LocalTime admisionToAdminTime;
     @Column(nullable = false)
-    private Long totalQuestionsAnswered;
+    private Integer totalQuestionsAnswered;
     @Column(nullable = false)
     private Boolean isActive = true;
 
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
     private List<QuestAndAnswer> answers = new ArrayList<>();
-
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
     private List<DailyAlerts> alert= new ArrayList<>();;

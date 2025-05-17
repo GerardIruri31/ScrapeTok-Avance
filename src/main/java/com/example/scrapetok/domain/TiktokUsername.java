@@ -10,7 +10,7 @@ public class TiktokUsername {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false)
-    private String email;
+    private String username;
     @ManyToOne(optional = false)
     @JoinColumn(name = "historial_id", nullable = false)
     private UserApifyCallHistorial historial;

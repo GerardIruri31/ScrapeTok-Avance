@@ -4,6 +4,8 @@ package com.example.scrapetok.domain;
 import com.example.scrapetok.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -22,5 +24,5 @@ public class GeneralAccount {
     @Column(nullable = false)
     private Role role = Role.USER;
     @Column(nullable = false)
-    private Date creationDate;
+    private LocalDate creationDate;
 }

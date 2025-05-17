@@ -2,9 +2,8 @@ package com.example.scrapetok.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
-
-import java.sql.Time;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
 @Entity
@@ -18,39 +17,41 @@ public class UserTiktokMetrics {
     @JoinColumn(name = "user_id")
     private UserAccount user;
     @Column(nullable = false)
-    private Long postId;
+    private String postId;
     @Column(nullable = false)
-    private Date datePosted;
+    private LocalDate datePosted;
     @Column(nullable = false)
-    private Time hoursPosted;
+    private LocalTime  hourPosted;
     @Column(nullable = false)
     private String usernameTiktokAccount;
     @Column(nullable = false)
     private String postURL;
     @Column(nullable = false)
-    private Long views;
+    private Integer views;
     @Column(nullable = false)
-    private Long likes;
+    private Integer likes;
     @Column(nullable = false)
-    private Long comments;
+    private Integer comments;
     @Column(nullable = false)
-    private Long saves;
+    private Integer saves;
     @Column(nullable = false)
-    private Long reposts;
+    private Integer reposts;
     @Column(nullable = false)
-    private Long totalInteractions;
+    private Integer totalInteractions;
     @Column(nullable = false)
     private Double engagement;
     @Column(nullable = false)
-    private Long numberHashtags;
+    private Integer numberHashtags;
     @Column(nullable = false)
     private String hashtags;
+    @Column(nullable = false)
+    private String soundId;
     @Column(nullable = false)
     private String soundURL;
     @Column(nullable = false)
     private String regionPost;
     @Column(nullable = false)
-    private Date dateTracking;
+    private LocalDate dateTracking;
     @Column(nullable = false)
-    private Time timeTracking;
+    private LocalTime timeTracking;
 }

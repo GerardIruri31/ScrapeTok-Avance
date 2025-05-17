@@ -22,17 +22,11 @@ public class UserApifyCallHistorial {
 
 
     @Column(columnDefinition = "BIGINT DEFAULT 0")
-    private Long amountScrappedAccount;
-
-
-    @Enumerated(EnumType.STRING)
-    private ApifyRunStatus apifyRunStatus;
-    private Time executionTime;
-
+    private Integer amountScrappedAccount;
 
     @OneToMany(mappedBy = "historial", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserApifyFilters> filtros= new ArrayList<>();;
 
-    @OneToMany(mappedBy = "historial", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "historial", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TiktokUsername> usernames = new ArrayList<>();;
 }

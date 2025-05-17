@@ -1,5 +1,5 @@
 package com.example.scrapetok.domain.enums;
 
 public enum ApifyRunStatus {
-    COMPLETED, ERROR
+    COMPLETED, FAILED
 }

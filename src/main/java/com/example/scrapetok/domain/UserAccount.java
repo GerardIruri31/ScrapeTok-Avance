@@ -14,7 +14,6 @@ public class UserAccount extends GeneralAccount {
     private String username;
     @OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserApifyCallHistorial historial;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)  // Relación Débil
     private List<UserTiktokMetrics> userTiktokMetrics = new ArrayList<>();
 
