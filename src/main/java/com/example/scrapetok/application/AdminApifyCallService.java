@@ -2,14 +2,13 @@ package com.example.scrapetok.application;
 
 import com.example.scrapetok.application.apifyservice.ApifyServerConnection;
 import com.example.scrapetok.application.apifyservice.JsonProcessor;
-import com.example.scrapetok.domain.AdminAccount;
-import com.example.scrapetok.domain.DTO.AdminFilterDTO;
+import com.example.scrapetok.domain.AdminProfile;
+import com.example.scrapetok.domain.DTO.AdminFilterRequestDTO;
 import com.example.scrapetok.domain.DTO.HashtagTrendDTO;
-import com.example.scrapetok.repository.AdminAccountRepository;
-
+import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.AdminTikTokMetricsRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.modelmapper.ModelMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,23 +16,23 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Transactional
 @Service
 public class AdminApifyCallService {
-    @Autowired
-    private AdminAccountRepository adminAccountRepository;
     @Autowired
     private ApifyServerConnection apifyServerConnection;
     @Autowired
     private JsonProcessor jsonProcessor;
     @Autowired
-    private ModelMapper modelMapper;
-    @Autowired
     private AdminTikTokMetricsRepository adminTikTokMetricsRepository;
+    @Autowired
+    private AdminProfileRepository adminProfileRepository;
 
-    public List<Object> apifyconnection(AdminFilterDTO request) throws Exception {
+    public List<Object> apifyconnection(AdminFilterRequestDTO request) throws Exception {
         List<Object> dataSet = new ArrayList<>();
-        AdminAccount admin = adminAccountRepository.findByEmail(request.getEmail())
+        AdminProfile admin = adminProfileRepository.findById(request.getAdminId())
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
+
         // Hacer llamado a APIFY
         Map<String, Object> jsonInput = new HashMap<>();
         // TOKEN ADMINISTRADOR DE APIFY
@@ -44,12 +43,16 @@ public class AdminApifyCallService {
         jsonInput.put("resultsPerPage", 10);
         List<String> hashtags = Arrays.stream(request.getHashtags().split(",")).map(String::trim).collect(Collectors.toList());
         jsonInput.put("hashtags", hashtags);
+
         // DEBUG: Mostrar el JSON que se enviará
         System.out.println("JSON enviado: " + jsonInput);
+
         // HACER LLAMADO A APIFY
-        Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput,admin.getId());
+        Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput);
+
         // PROCESAR DATOS Y GUARDAR EN BD
         List<Map<String, Object>> data = jsonProcessor.processJson(ApifyResponse, admin);
+
         // CONSULTAS SQL A DATA RECIÉN GUARDADA
         List<Map<String,Object>> usernameVsViews = adminTikTokMetricsRepository.findViewsGroupedByUsernameForToday();
         List<Map<String,Object>> musicIdVsViews = adminTikTokMetricsRepository.findViewsGroupedByMusicIdForToday();

@@ -2,14 +2,15 @@ package com.example.scrapetok.application;
 
 import com.example.scrapetok.application.apifyservice.ApifyServerConnection;
 import com.example.scrapetok.application.apifyservice.JsonProcessor;
-import com.example.scrapetok.domain.UserAccount;
+import com.example.scrapetok.domain.GeneralAccount;
 import com.example.scrapetok.domain.UserApifyCallHistorial;
 import com.example.scrapetok.domain.UserApifyFilters;
-import com.example.scrapetok.domain.DTO.UserFiltersDTO;
-import com.example.scrapetok.repository.UserAccountRepository;
+import com.example.scrapetok.domain.DTO.UserFiltersRequestDTO;
+import com.example.scrapetok.repository.GeneralAccountRepository;
 import com.example.scrapetok.repository.UserApifyCallHistorialRepository;
 import com.example.scrapetok.repository.UserApifyFilterRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Transactional
 @Service
 public class UserApifyCallService {
     @Autowired
@@ -28,7 +30,7 @@ public class UserApifyCallService {
     @Autowired
     private UserApifyCallHistorialRepository userApifyCallHistorialRepository;
     @Autowired
-    private UserAccountRepository userAccountRepository;
+    private GeneralAccountRepository generalAccountRepository;
     @Autowired
     private ApifyServerConnection apifyServerConnection;
     @Autowired
@@ -36,16 +38,16 @@ public class UserApifyCallService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<Map<String,Object>> apifyconnection(UserFiltersDTO request) throws Exception {
-        UserAccount user = userAccountRepository.findByEmail(request.getEmail())
+    public List<Map<String,Object>> apifyconnection(UserFiltersRequestDTO request) throws Exception {
+        // Obtener usuario que hace request
+        GeneralAccount user = generalAccountRepository.findById(request.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
-        UserApifyCallHistorial historial = userApifyCallHistorialRepository.findByUserAccount_Email(user.getEmail())
-                .orElseThrow(() -> new EntityNotFoundException("User has no historial"));
-        UserApifyFilters filter = modelMapper.map(historial, UserApifyFilters.class);
+        // Obtener historial del usuario
+        UserApifyCallHistorial historial = user.getHistorial();
+        // Crear nuevo filtro del usuario
+        UserApifyFilters filter = modelMapper.map(request, UserApifyFilters.class);
+        // le asigno historial al que pertenece filtro
         filter.setHistorial(historial);
-        userApifyFilterRepository.save(filter);
-        historial.setAmountScrappedAccount(historial.getAmountScrappedAccount()+1);
-        userApifyCallHistorialRepository.save(historial);
 
         // Hacer llamado a APIFY
         Map<String, Object> jsonInput = new HashMap<>();
@@ -74,7 +76,17 @@ public class UserApifyCallService {
         }
         // DEBUG: Mostrar el JSON que se enviará
         System.out.println("JSON enviado: " + jsonInput);
-        Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput, filter.getId());
-        return jsonProcessor.processJson(ApifyResponse, user, filter.getId());
+        Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput, filter);
+
+        // historial.setAmountScrappedAccount(historial.getAmountScrappedAccount()+1);
+        List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial, filter);
+
+        // Guardar filter con todos los cambios
+        userApifyFilterRepository.save(filter);
+        // Guardar historial
+        userApifyCallHistorialRepository.save(historial);
+        // Guardar UserAccount
+        generalAccountRepository.save(user);
+        return processedData;
     }
 }

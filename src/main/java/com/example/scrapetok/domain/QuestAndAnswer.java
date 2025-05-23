@@ -3,10 +3,9 @@ package com.example.scrapetok.domain;
 import com.example.scrapetok.domain.enums.statusQA;
 import jakarta.persistence.*;
 import lombok.Data;
-import java.sql.Time;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 
 @Data
 @Entity
@@ -17,14 +16,17 @@ public class QuestAndAnswer {
     private Long id;
 
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
-    private UserAccount user;
+    private GeneralAccount user;
 
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id") // Puede ser null si pregunta aún no se responde
-    private AdminAccount admin;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "admin_id", nullable = true) // Puede ser null si pregunta aún no se responde
+    private AdminProfile admin;
+
+
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private statusQA status = statusQA.PENDING;

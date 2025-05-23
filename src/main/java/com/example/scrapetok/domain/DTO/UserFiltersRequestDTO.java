@@ -4,9 +4,9 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
-public class UserFiltersDTO {
+public class UserFiltersRequestDTO {
     @NotBlank
-    private String email;
+    private Long userId;
     // Separador en string -> ','
     private String hashtags;
     @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}", message = "The date must follow the format YYYY-MM-DD")
@@ -20,6 +20,7 @@ public class UserFiltersDTO {
     @Min(value = 1, message = "At least 1 post must be requested")
     @Max(value = 100, message = "You cannot request more than 100 posts")
     private Long NlastPostByHashtags;
+    // Separador en string -> ','
     private String tiktokAccount;
 
 }

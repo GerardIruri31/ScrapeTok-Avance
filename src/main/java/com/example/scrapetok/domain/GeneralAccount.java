@@ -6,11 +6,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.*;
 
 @Data
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
 public class GeneralAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,9 +19,31 @@ public class GeneralAccount {
     private String email;
     @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
+    private String firstname;
+    @Column(nullable = false)
+    private String lastname;
+    @Column(nullable = false)
+    private String username;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role = Role.USER;
     @Column(nullable = false)
     private LocalDate creationDate;
+
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserApifyCallHistorial historial;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserTiktokMetrics> userTiktokMetrics = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<QuestAndAnswer> questions = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private AdminProfile admin;
+
+    @ManyToMany(mappedBy = "userEmails")
+    private Set<DailyAlerts> receivedAlerts = new HashSet<>();
 }

@@ -3,12 +3,12 @@ package com.example.scrapetok.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @Entity
@@ -19,9 +19,9 @@ public class DailyAlerts {
     private Long id;
 
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "admin_id", nullable = false)
-    private AdminAccount admin;
+    private AdminProfile admin;
 
 
     @Column(nullable = false)
@@ -32,6 +32,13 @@ public class DailyAlerts {
     private LocalDate postedDate;
     @Column(nullable = false)
     private LocalTime postedTime;
-    @OneToMany(mappedBy = "alert", cascade = CascadeType.ALL)
-    private List<Email> emails = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "alert_user",
+            // Dueño de la relación
+            joinColumns = @JoinColumn(name = "alert_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<GeneralAccount> userEmails = new HashSet<>();
 }

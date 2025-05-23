@@ -1,9 +1,8 @@
 package com.example.scrapetok.application.apifyservice;
 
 import com.example.scrapetok.domain.*;
-import com.example.scrapetok.domain.enums.ApifyRunStatus;
 import com.example.scrapetok.repository.AdminTikTokMetricsRepository;
-import com.example.scrapetok.repository.UserApifyFilterRepository;
+import com.example.scrapetok.repository.TiktokUsernameRepository;
 import com.example.scrapetok.repository.UserTiktokMetricsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +16,19 @@ import java.util.stream.Collectors;
 
 @Component
 public class JsonProcessor {
-    private List<Map<String, Object>> lastProcessedData = new ArrayList<>();
+    private final List<Map<String, Object>> lastProcessedData = new ArrayList<>();
     @Autowired
     private UserTiktokMetricsRepository userTiktokMetricsRepository;
     @Autowired
-    private UserApifyFilterRepository userApifyFilterRepository;
-    @Autowired
     private AdminTikTokMetricsRepository adminTiktokMetricsRepository;
+    @Autowired
+    private TiktokUsernameRepository tiktokUsernameRepository;
 
-    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, UserAccount user, Long FilterId) throws EntityNotFoundException {
+    // Logica para User -> Procesar user scraping
+    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, GeneralAccount user, UserApifyCallHistorial historial, UserApifyFilters filter) throws EntityNotFoundException {
         List<UserTiktokMetrics> metricasList = new ArrayList<>();
-        lastProcessedData.clear(); // Evita acumulación de datos de ejecuciones anteriores
+        // Evita acumulación de datos de ejecuciones anteriores
+        lastProcessedData.clear();
         if (jsonResponse.isEmpty()) {
             throw new EntityNotFoundException("No data found");
         }
@@ -36,8 +37,8 @@ public class JsonProcessor {
         ZoneId zoneId = timeZone.toZoneId();
 
         // Guardar copia de usernames existentes ANTES de agregar nuevos
-        Set<String> yaGuardadosPrevios = user.getHistorial().getUsernames().stream()
-                .map(u -> u.getUsername().toLowerCase())// Leer el JSON y navegar hasta la parte relevante
+        Set<String> yaGuardadosPrevios = historial.getTiktokUsernames().stream()
+                .map(u -> u.getUsername().toLowerCase())
                 .collect(Collectors.toSet());
 
         @SuppressWarnings("unchecked")
@@ -89,8 +90,7 @@ public class JsonProcessor {
 
             // Procesar hashtags
             List<String> listaHashtags = new ArrayList<>();
-            if (item.containsKey("hashtags") && item.get("hashtags") instanceof List) {
-                List<?> hashtags = (List<?>) item.get("hashtags");
+            if (item.containsKey("hashtags") && item.get("hashtags") instanceof List<?> hashtags) {
                 for (Object ht : hashtags) {
                     if (ht instanceof Map) {
                         @SuppressWarnings("unchecked")
@@ -151,7 +151,7 @@ public class JsonProcessor {
             dataMap.put("Region of posting", region);
             dataMap.put("Tracking date", fechaTrackeo);
             dataMap.put("Tracking time", horaTrackeo);
-            dataMap.put("Client", user.getEmail());
+            dataMap.put("User", user.getUsername());
 
             // Agregar al listado publicación a la lista contenedora de todos.
             lastProcessedData.add(dataMap);
@@ -184,43 +184,27 @@ public class JsonProcessor {
 
                 // Verificar si ya existe el username en el historial
                 final String nombreCuentaFinal = nombreCuenta;
-                boolean yaExiste = user.getHistorial().getUsernames()
-                        .stream()
-                        .anyMatch(u -> u.getUsername().equalsIgnoreCase(nombreCuentaFinal));
-
+                boolean yaExiste = yaGuardadosPrevios.contains(nombreCuentaFinal.toLowerCase());
                 if (!yaExiste) {
-                    TiktokUsername usernameEntity = new TiktokUsername();
-                    usernameEntity.setUsername(nombreCuenta);
-                    usernameEntity.setHistorial(user.getHistorial());
-
-                    // Asociar al historial (se guarda automáticamente si hay cascade)
-                    user.getHistorial().getUsernames().add(usernameEntity);
+                    TiktokUsername nuevo = new TiktokUsername();
+                    nuevo.setUsername(nombreCuentaFinal);
+                    historial.getTiktokUsernames().add(nuevo);
+                    tiktokUsernameRepository.save(nuevo);
                 }
             }
         }
         // Guardar en BD cada registro
         if (!metricasList.isEmpty()) {
             userTiktokMetricsRepository.saveAll(metricasList);
-            Set<String> nuevosUnicos = lastProcessedData.stream()
-                    .map(m -> ((String) m.get("TikTok Account Username")).toLowerCase())
-                    .filter(u -> !yaGuardadosPrevios.contains(u))
-                    .collect(Collectors.toSet());
-
-            int nuevos = nuevosUnicos.size();
-            int anterior = user.getHistorial().getAmountScrappedAccount() != null
-                    ? user.getHistorial().getAmountScrappedAccount()
-                    : 0;
-            user.getHistorial().setAmountScrappedAccount(anterior + nuevos);
-            UserApifyFilters filter = userApifyFilterRepository.findById(FilterId).orElseThrow(() -> new EntityNotFoundException("Filter id: " + FilterId + " Not found"));
-            filter.setApifyRunStatus(ApifyRunStatus.COMPLETED);
-            userApifyFilterRepository.save(filter);
+            int cantTiktokAccountScraped = yaGuardadosPrevios.size();
+            historial.setAmountScrappedAccount(cantTiktokAccountScraped);
         }
         return lastProcessedData;
     }
 
 
-
-    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, AdminAccount admin) throws EntityNotFoundException {
+    // Logica para Admin -> Procesar admin scraping
+    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, AdminProfile admin) throws EntityNotFoundException {
         List<AdminTiktokMetrics> metricasList = new ArrayList<>();
         lastProcessedData.clear(); // Evita acumulación de datos de ejecuciones anteriores
         if (jsonResponse.isEmpty()) {
@@ -279,8 +263,7 @@ public class JsonProcessor {
 
             // Procesar hashtags
             List<String> listaHashtags = new ArrayList<>();
-            if (item.containsKey("hashtags") && item.get("hashtags") instanceof List) {
-                List<?> hashtags = (List<?>) item.get("hashtags");
+            if (item.containsKey("hashtags") && item.get("hashtags") instanceof List<?> hashtags) {
                 for (Object ht : hashtags) {
                     if (ht instanceof Map) {
                         @SuppressWarnings("unchecked")
@@ -341,8 +324,7 @@ public class JsonProcessor {
             dataMap.put("Region of posting", region);
             dataMap.put("Tracking date", fechaTrackeo);
             dataMap.put("Tracking time", horaTrackeo);
-            dataMap.put("Admin", admin.getEmail());
-
+            dataMap.put("User", admin.getUser().getUsername());
             // Agregar al listado publicación a la lista contenedora de todos.
             lastProcessedData.add(dataMap);
 
@@ -367,7 +349,7 @@ public class JsonProcessor {
                 metrica.setRegionPost(region);
                 metrica.setDateTracking(fechaTrackeo);
                 metrica.setTimeTracking(horaTrackeo);
-                // Asignar USER q hizo SCRAPEO
+                // Cada post tiene un Admin
                 metrica.setAdmin(admin);
                 // Agregar a la lista de METRICASLIST general para la BD
                 metricasList.add(metrica);
@@ -379,7 +361,6 @@ public class JsonProcessor {
         }
         return lastProcessedData;
     }
-
 
     private static Object[] formatearFechaHora(String fechaHoraISO) {
         try {

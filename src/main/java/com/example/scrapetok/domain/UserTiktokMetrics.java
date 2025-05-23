@@ -13,9 +13,13 @@ public class UserTiktokMetrics {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserAccount user;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private GeneralAccount user;
+
+
+
     @Column(nullable = false)
     private String postId;
     @Column(nullable = false)

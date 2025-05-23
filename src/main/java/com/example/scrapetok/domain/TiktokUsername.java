@@ -3,6 +3,9 @@ package com.example.scrapetok.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Data
 public class TiktokUsername {
@@ -11,7 +14,7 @@ public class TiktokUsername {
     private Long id;
     @Column(nullable = false)
     private String username;
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "historial_id", nullable = false)
-    private UserApifyCallHistorial historial;
+
+    @ManyToMany(mappedBy = "tiktokUsernames")
+    private Set<UserApifyCallHistorial> historial = new HashSet<>();
 }

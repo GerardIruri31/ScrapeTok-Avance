@@ -6,7 +6,9 @@ import lombok.Data;
 
 import java.sql.Time;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -16,17 +18,24 @@ public class UserApifyCallHistorial {
     @Column(nullable = false)
     private Long id;
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private UserAccount userAccount;
-
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "user_id")
+    private GeneralAccount user;
 
     @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Integer amountScrappedAccount;
 
     @OneToMany(mappedBy = "historial", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserApifyFilters> filtros= new ArrayList<>();;
+    private List<UserApifyFilters> filtros= new ArrayList<>();
 
-    @OneToMany(mappedBy = "historial", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TiktokUsername> usernames = new ArrayList<>();;
+    @ManyToMany(cascade = CascadeType.PERSIST)
+    @JoinTable(
+            name = "historial_TTUsername",
+            // Dueño de la relación
+            joinColumns = @JoinColumn(name = "historial_id"),
+            inverseJoinColumns = @JoinColumn(name = "tiktok_username_id")
+    )
+
+    private Set<TiktokUsername> tiktokUsernames = new HashSet<>();
 }

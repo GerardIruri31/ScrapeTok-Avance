@@ -8,5 +8,4 @@ import java.util.Optional;
 
 @Repository
 public interface UserApifyCallHistorialRepository extends JpaRepository<UserApifyCallHistorial, Long> {
-    Optional<UserApifyCallHistorial> findByUserAccount_Email(String email);
 }

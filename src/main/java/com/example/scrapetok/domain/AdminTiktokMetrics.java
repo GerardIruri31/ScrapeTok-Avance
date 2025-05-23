@@ -4,10 +4,8 @@ package com.example.scrapetok.domain;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 
 @Data
 @Entity
@@ -18,9 +16,11 @@ public class AdminTiktokMetrics {
     @Column(nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id")
-    private AdminAccount admin;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "admin_id",nullable = false)
+    private AdminProfile admin;
+
+
     @Column(nullable = false)
     private String postId;
     @Column(nullable = false)

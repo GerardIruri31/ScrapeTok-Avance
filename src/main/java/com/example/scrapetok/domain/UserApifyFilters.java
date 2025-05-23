@@ -11,9 +11,11 @@ public class UserApifyFilters {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private long id;
-    @ManyToOne(optional = false)
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "historial_id", nullable = false)
     private UserApifyCallHistorial historial;
+
     private String hashtags;
     private String dateFrom;
     private String dateTo;
