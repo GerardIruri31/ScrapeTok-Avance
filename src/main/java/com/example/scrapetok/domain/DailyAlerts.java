@@ -26,7 +26,7 @@ public class DailyAlerts {
 
     @Column(nullable = false)
     private String subject;
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
     @Column(nullable = false)
     private LocalDate postedDate;

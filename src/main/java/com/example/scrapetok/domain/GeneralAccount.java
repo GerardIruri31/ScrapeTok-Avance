@@ -2,6 +2,7 @@ package com.example.scrapetok.domain;
 
 
 import com.example.scrapetok.domain.enums.Role;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -36,6 +37,7 @@ public class GeneralAccount {
     private UserApifyCallHistorial historial;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
     private List<UserTiktokMetrics> userTiktokMetrics = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

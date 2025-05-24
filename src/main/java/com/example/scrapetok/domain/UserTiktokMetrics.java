@@ -1,5 +1,6 @@
 package com.example.scrapetok.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ public class UserTiktokMetrics {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonManagedReference
     private GeneralAccount user;
 
 
@@ -46,7 +48,7 @@ public class UserTiktokMetrics {
     private Double engagement;
     @Column(nullable = false)
     private Integer numberHashtags;
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String hashtags;
     @Column(nullable = false)
     private String soundId;

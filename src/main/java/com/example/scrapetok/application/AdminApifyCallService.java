@@ -52,17 +52,18 @@ public class AdminApifyCallService {
 
         // PROCESAR DATOS Y GUARDAR EN BD
         List<Map<String, Object>> data = jsonProcessor.processJson(ApifyResponse, admin);
+        dataSet.add(data);
 
         // CONSULTAS SQL A DATA RECIÉN GUARDADA
-        List<Map<String,Object>> usernameVsViews = adminTikTokMetricsRepository.findViewsGroupedByUsernameForToday();
+        /*List<Map<String,Object>> usernameVsViews = adminTikTokMetricsRepository.findViewsGroupedByUsernameForToday();
         List<Map<String,Object>> musicIdVsViews = adminTikTokMetricsRepository.findViewsGroupedByMusicIdForToday();
         List<Map<String,Object>> DatePostVsViews = adminTikTokMetricsRepository.findViewsGroupedByPostDateTrackedToday();
         List<HashtagTrendDTO> frecuencyAndViewsPerHashtag = adminTikTokMetricsRepository.findTopHashtagsTrendingToday();
-        dataSet.add(data);
         dataSet.add(usernameVsViews);
         dataSet.add(musicIdVsViews);
         dataSet.add(DatePostVsViews);
-        dataSet.add(frecuencyAndViewsPerHashtag);
+        dataSet.add(frecuencyAndViewsPerHashtag);*/
+
         return dataSet;
     }
 }

@@ -16,12 +16,14 @@ public class UserApifyFilters {
     @JoinColumn(name = "historial_id", nullable = false)
     private UserApifyCallHistorial historial;
 
+    @Column(columnDefinition = "TEXT")
     private String hashtags;
     private String dateFrom;
     private String dateTo;
     private Integer minLikes;
     private Integer maxLikes;
     private Integer NlastPostByHashtags = 1;
+    @Column(columnDefinition = "TEXT")
     private String tiktokAccount;
 
     @Enumerated(EnumType.STRING)

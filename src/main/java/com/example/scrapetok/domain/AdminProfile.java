@@ -1,5 +1,6 @@
 package com.example.scrapetok.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ public class AdminProfile {
     @Column(nullable = false)
     private LocalTime admisionToAdminTime;
     @Column(nullable = false)
-    private Integer totalQuestionsAnswered;
+    private Integer totalQuestionsAnswered = 0;
     @Column(nullable = false)
     private Boolean isActive = true;
 
@@ -34,5 +35,6 @@ public class AdminProfile {
     private List<DailyAlerts> alert= new ArrayList<>();
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    @JsonBackReference
     List<AdminTiktokMetrics> TiktokMetrics = new ArrayList<>();
 }

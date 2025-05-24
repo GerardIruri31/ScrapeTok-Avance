@@ -23,9 +23,9 @@ public class AnswersController {
         } catch (ResponseStatusException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("⚠️ Warning: " + e.getMessage());
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Entity Error: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Unexpected Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " + e.getMessage());
         }
     };
 

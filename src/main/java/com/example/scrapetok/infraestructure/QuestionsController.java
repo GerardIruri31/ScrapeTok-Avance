@@ -20,7 +20,7 @@ public class QuestionsController {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(questionsAndAnswersService.assignQuestion(request));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Unexpected Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " + e.getMessage());
         }
     };
 
@@ -29,9 +29,8 @@ public class QuestionsController {
         try {
             return ResponseEntity.status(HttpStatus.OK).body(questionsAndAnswersService.getQuestions());
         } catch (ResponseStatusException e) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("❌ Unexpected Error: " + e.getMessage());
-        }
-        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("❌ Content Error: " + e.getMessage());
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " + e.getMessage());
         }
     };

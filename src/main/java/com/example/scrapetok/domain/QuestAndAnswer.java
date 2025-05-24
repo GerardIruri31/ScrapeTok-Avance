@@ -30,12 +30,13 @@ public class QuestAndAnswer {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private statusQA status = statusQA.PENDING;
-    @Column(nullable = false)
+    @Column(nullable = false,columnDefinition = "TEXT")
     private String questionDescription;
     @Column(nullable = false)
     private LocalDate questionDate;
     @Column(nullable = false)
     private LocalTime questionHour;
+    @Column(columnDefinition = "TEXT")
     private String answerDescription;
     private LocalDate answerDate;
     private LocalTime  answerHour;

@@ -1,10 +1,8 @@
 package com.example.scrapetok.domain;
 
-import com.example.scrapetok.domain.enums.ApifyRunStatus;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
