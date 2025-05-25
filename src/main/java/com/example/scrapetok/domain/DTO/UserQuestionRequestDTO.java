@@ -1,12 +1,13 @@
 package com.example.scrapetok.domain.DTO;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class UserQuestionRequestDTO {
-    @NotBlank
+    @NotNull
     private Long userId;
     @NotBlank
-    private Long questionDescription;
+    private String questionDescription;
 }

@@ -1,12 +1,13 @@
 package com.example.scrapetok.domain.DTO;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class UpgradeToAdminRequestDTO {
-    @NotBlank
+    @NotNull
     private Long userid;
-    @NotBlank
+    @NotNull
     private Long adminId;
 }

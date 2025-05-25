@@ -23,6 +23,7 @@ public class UserApifyCallController {
     public ResponseEntity<?> makeApifyCall(@RequestBody @Valid UserFiltersRequestDTO request) {
         try {
             // Retorna List<Map<String,Object>
+            System.out.println(request.getNlastPostByHashtags());
             return ResponseEntity.ok(userApifyCallService.apifyconnection(request));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

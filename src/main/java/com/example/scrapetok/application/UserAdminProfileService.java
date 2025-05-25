@@ -24,9 +24,14 @@ public class UserAdminProfileService {
         UserProfileResponseDTO userProfile = modelMapper.map(user, UserProfileResponseDTO.class);
 
         UserApifyCallHistorial userHistorial = user.getHistorial();
-        if (userHistorial == null) throw new EntityNotFoundException("Historial not found for user " + userId);
-        userProfile.setAmountScrappedAccount(userHistorial.getAmountScrappedAccount());
+        if (userHistorial == null) {
+            userProfile.setAmountScrappedAccount(0);
+            userProfile.setFilters(new ArrayList<>());
+            userProfile.setTiktokUsernameScraped(Collections.emptySet());
+            throw new EntityNotFoundException("Historial not found for user " + userId);
+        }
 
+        userProfile.setAmountScrappedAccount(userHistorial.getAmountScrappedAccount() != null ? userHistorial.getAmountScrappedAccount() : 0);
         List<Map<Object,Object>> filterMatrix = new ArrayList<>();
         List<UserApifyFilters> historialFilters = userHistorial.getFiltros();
         for (UserApifyFilters filter: historialFilters) {
@@ -35,8 +40,7 @@ public class UserAdminProfileService {
                 filterHashmap.put("Hashtags", filter.getHashtags());
                 filterHashmap.put("Date From", filter.getDateFrom());
                 filterHashmap.put("Date to", filter.getDateTo());
-                filterHashmap.put("Min likes", filter.getMinLikes());
-                filterHashmap.put("Max likes", filter.getMaxLikes());
+                filterHashmap.put("Key Word", filter.getKeyWords());
                 filterHashmap.put("N Last Post By Hashtags", filter.getNlastPostByHashtags());
                 filterHashmap.put("Tiktok Usernames", filter.getTiktokAccount());
                 filterHashmap.put("Execution Time", filter.getExecutionTime());
@@ -64,7 +68,7 @@ public class UserAdminProfileService {
         if (admin == null) {
             return userProfile;
         }
-        modelMapper.map(admin,AdminProfileResponseDTO.class);
+        modelMapper.map(admin,userProfile);
 
         List<Map<String,String>> questionAnswers = null;
         if (admin.getAnswers() != null) {

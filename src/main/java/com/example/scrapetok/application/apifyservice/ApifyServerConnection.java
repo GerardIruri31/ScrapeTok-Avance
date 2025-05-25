@@ -2,8 +2,10 @@ package com.example.scrapetok.application.apifyservice;
 
 import com.example.scrapetok.domain.UserApifyFilters;
 import com.example.scrapetok.domain.enums.ApifyRunStatus;
+import com.example.scrapetok.repository.UserApifyFilterRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
@@ -62,10 +64,11 @@ public class ApifyServerConnection {
             // tiempo de ejecución en milisegundos -> APIFY
             int tiempoTotal = (int) (fin - inicio);
             filter.setExecutionTime(tiempoTotal);
+
             // Interpret API response
-            if (responseMap.containsKey("Sucess")) {
+            if (responseMap.containsKey("Success")) {
                 filter.setApifyRunStatus(ApifyRunStatus.COMPLETED);
-                return Map.of("Sucess", responseMap.get("Success"));
+                return Map.of("Success", responseMap.get("Success"));
             } else if (responseMap.containsKey("Error")) {
                 filter.setApifyRunStatus(ApifyRunStatus.FAILED);
                 return Map.of("Error", responseMap.get("Error"));
@@ -113,8 +116,8 @@ public class ApifyServerConnection {
 
             Map<String, Object> responseMap = objectMapper.readValue(response.toString(), new TypeReference<>() {});
             // Interpret API response
-            if (responseMap.containsKey("Sucess")) {
-                return Map.of("Sucess", responseMap.get("Success"));
+            if (responseMap.containsKey("Success")) {
+                return Map.of("Success", responseMap.get("Success"));
             } else if (responseMap.containsKey("Error")) {
                 return Map.of("Error", responseMap.get("Error"));
             }

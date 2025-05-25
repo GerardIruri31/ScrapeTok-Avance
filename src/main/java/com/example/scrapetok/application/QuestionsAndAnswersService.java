@@ -4,9 +4,11 @@ import com.example.scrapetok.domain.AdminProfile;
 import com.example.scrapetok.domain.DTO.AdminAnswerRequestDTO;
 import com.example.scrapetok.domain.DTO.FullAnswerQuestionResponseDTO;
 import com.example.scrapetok.domain.DTO.UserQuestionRequestDTO;
+import com.example.scrapetok.domain.GeneralAccount;
 import com.example.scrapetok.domain.QuestAndAnswer;
 import com.example.scrapetok.domain.enums.statusQA;
 import com.example.scrapetok.repository.AdminProfileRepository;
+import com.example.scrapetok.repository.GeneralAccountRepository;
 import com.example.scrapetok.repository.QuestionAndAnswerRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -30,14 +32,23 @@ public class QuestionsAndAnswersService {
     private QuestionAndAnswerRepository questionAndAnswerRepository;
     @Autowired
     private AdminProfileRepository adminProfileRepository;
+    @Autowired
+    private GeneralAccountRepository generalAccountRepository;
 
     // Usuario hace una pregunta
     public FullAnswerQuestionResponseDTO assignQuestion(UserQuestionRequestDTO request) {
-        QuestAndAnswer questAndAnswer = modelMapper.map(request, QuestAndAnswer.class);
-        //Fecha y hora de Perú
+        GeneralAccount user = generalAccountRepository.findById(request.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("No user with ID " + request.getUserId()));
+
+        QuestAndAnswer questAndAnswer = new QuestAndAnswer();
+        questAndAnswer.setUser(user);
+        questAndAnswer.setQuestionDescription(request.getQuestionDescription());
+
         ZonedDateTime zonedDateTime = obtenerFechaYHoraDePeru();
         questAndAnswer.setQuestionDate(zonedDateTime.toLocalDate());
         questAndAnswer.setQuestionHour(zonedDateTime.toLocalTime().withNano(0));
+        questAndAnswer.setStatus(statusQA.PENDING);
+
         QuestAndAnswer saved = questionAndAnswerRepository.save(questAndAnswer);
         return modelMapper.map(saved, FullAnswerQuestionResponseDTO.class);
     }
@@ -60,15 +71,15 @@ public class QuestionsAndAnswersService {
 
     // Admin responde una pregunta
     public FullAnswerQuestionResponseDTO replyQuestion(AdminAnswerRequestDTO request) throws EntityNotFoundException, ResponseStatusException {
-        if (request.getStatus() == statusQA.ANSWERED) throw new ResponseStatusException(HttpStatus.CONFLICT, "This question has already been answered.");
-
         AdminProfile admin = adminProfileRepository.findById(request.getAdminId()).orElseThrow(() -> new EntityNotFoundException("No admin with ID " + request.getAdminId()));
         QuestAndAnswer questAndAnswer = questionAndAnswerRepository.findById(request.getQuestionId()).orElseThrow(()-> new EntityNotFoundException("No question with ID " + request.getQuestionId()));
-
+        if (questAndAnswer.getStatus() == statusQA.ANSWERED) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This question has already been answered.");
+        }
         questAndAnswer.setAnswerDescription(request.getAnswerDescription());
         questAndAnswer.setAdmin(admin);
         questAndAnswer.setStatus(statusQA.ANSWERED);
-        //Fecha y hora de Perú
+
         ZonedDateTime zonedDateTime = obtenerFechaYHoraDePeru();
         questAndAnswer.setAnswerDate(zonedDateTime.toLocalDate());
         questAndAnswer.setAnswerHour(zonedDateTime.toLocalTime().withNano(0));

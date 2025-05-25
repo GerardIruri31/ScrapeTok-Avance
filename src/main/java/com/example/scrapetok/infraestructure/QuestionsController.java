@@ -15,7 +15,7 @@ public class QuestionsController {
     @Autowired
     private QuestionsAndAnswersService questionsAndAnswersService;
 
-    @PostMapping("/creatQuestion")
+    @PostMapping("/createQuestion")
     public ResponseEntity<?> makeQuestion(@RequestBody @Valid UserQuestionRequestDTO request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(questionsAndAnswersService.assignQuestion(request));

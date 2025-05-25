@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/auth")
 public class AuthorizationController {
@@ -20,6 +21,18 @@ public class AuthorizationController {
     public ResponseEntity<?> userRegistration(@RequestBody @Valid UserSignUpRequestDTO request) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED).body(authorizationService.createUser(request));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ Client Error : " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " + e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/signupadmin")
+    public ResponseEntity<?> adminRegistration(@RequestBody @Valid UserSignUpRequestDTO request) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(authorizationService.createAdmin(request));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ Client Error : " + e.getMessage());
         } catch (Exception e) {

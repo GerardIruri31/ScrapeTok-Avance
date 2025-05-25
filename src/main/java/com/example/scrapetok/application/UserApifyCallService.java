@@ -16,19 +16,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Transactional
 @Service
 public class UserApifyCallService {
+
     @Autowired
     private UserApifyFilterRepository userApifyFilterRepository;
-    @Autowired
-    private UserApifyCallHistorialRepository userApifyCallHistorialRepository;
     @Autowired
     private GeneralAccountRepository generalAccountRepository;
     @Autowired
@@ -46,6 +42,7 @@ public class UserApifyCallService {
         UserApifyCallHistorial historial = user.getHistorial();
         // Crear nuevo filtro del usuario
         UserApifyFilters filter = modelMapper.map(request, UserApifyFilters.class);
+        filter.setId(null);
         // le asigno historial al que pertenece filtro
         filter.setHistorial(historial);
 
@@ -54,39 +51,49 @@ public class UserApifyCallService {
         // TOKEN ADMINISTRADOR DE APIFY
         String apifyToken = "apify_api_89Xx79YhvkBxEWUnnAyVuQpsolqN943YHcqo";
         jsonInput.put("apifyToken", apifyToken);
+        jsonInput.put("excludePinnedPosts", true);
         jsonInput.put("resultsPerPage", request.getNlastPostByHashtags());
 
-        jsonInput.put("excludePinnedPosts", true);
+
+        // Scrapeo por Hashtags
         if (request.getHashtags() != null && !request.getHashtags().isEmpty() && request.getNlastPostByHashtags() != null) {
+            List<String> video = new ArrayList<>();
+            video.add("videos");
+            jsonInput.put("profileScrapeSections",video);
+            jsonInput.put("profileSorting","latest");
             List<String> hashtags = Arrays.stream(request.getHashtags().split(",")).map(String::trim).collect(Collectors.toList());
             jsonInput.put("hashtags", hashtags);
         }
-        if ((request.getDateFrom() != null) && (request.getDateTo() != null)) {
-            jsonInput.put("oldestPostDate", request.getDateFrom());
-            jsonInput.put("newestPostDate", request.getDateTo());
-        }
-        if ((request.getMinLikes() != null) && (request.getMaxLikes() != null)) {
-            jsonInput.put("leastDiggs", request.getMinLikes());
-            jsonInput.put("mostDiggs", request.getMaxLikes());
-        }
-        if (request.getTiktokAccount() != null) {
+
+        // Scrapeo por profile
+        if ((request.getDateFrom() != null) && (request.getDateTo() != null) && (request.getTiktokAccount() != null)) {
             String lowerTiktokAccounts = request.getTiktokAccount().toLowerCase();
             List<String> tiktokUsername = Arrays.stream(lowerTiktokAccounts.split(",")).map(String::trim).collect(Collectors.toList());
             jsonInput.put("profiles", tiktokUsername);
+            jsonInput.put("oldestPostDate", request.getDateFrom());
+            jsonInput.put("newestPostDate", request.getDateTo());
         }
+
+        // Scrapeo por palabras clave
+        if (request.getKeyWords() != null) {
+            List<String> video = new ArrayList<>();
+            video.add("videos");
+            jsonInput.put("profileScrapeSections",video);
+            jsonInput.put("profileSorting","latest");
+            List<String> keywords = Arrays.stream(request.getKeyWords().split(",")).map(String::trim).collect(Collectors.toList());
+            jsonInput.put("searchQueries", keywords);
+        }
+
         // DEBUG: Mostrar el JSON que se enviará
         System.out.println("JSON enviado: " + jsonInput);
         Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput, filter);
 
-        // historial.setAmountScrappedAccount(historial.getAmountScrappedAccount()+1);
-        List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial, filter);
+        List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial);
 
-        // Guardar filter con todos los cambios
-        userApifyFilterRepository.save(filter);
-        // Guardar historial
-        userApifyCallHistorialRepository.save(historial);
         // Guardar UserAccount
         generalAccountRepository.save(user);
+        // GUARDO FILTRO
+        userApifyFilterRepository.save(filter);
         return processedData;
     }
 }

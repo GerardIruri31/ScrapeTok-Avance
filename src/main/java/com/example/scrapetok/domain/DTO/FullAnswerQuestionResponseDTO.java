@@ -9,12 +9,15 @@ import java.time.LocalTime;
 
 @Data
 public class FullAnswerQuestionResponseDTO {
+    private Long id;
     @Enumerated(EnumType.STRING)
     private statusQA status;
     private String questionDescription;
+    private String answerDescription;
+    private Long adminId;
+    private Long userId;
     private LocalDate questionDate;
     private LocalTime questionHour;
-    private String answerDescription;
     private LocalDate answerDate;
     private LocalTime  answerHour;
 }

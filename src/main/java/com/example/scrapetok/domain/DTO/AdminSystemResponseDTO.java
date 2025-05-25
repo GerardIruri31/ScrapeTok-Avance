@@ -1,11 +1,13 @@
 package com.example.scrapetok.domain.DTO;
 
+
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Data
-public class UserSignUpResponseDTO {
+public class AdminSystemResponseDTO {
     private Long id;
     private String email;
     private String password;
@@ -13,6 +15,8 @@ public class UserSignUpResponseDTO {
     private String lastname;
     private String username;
     private LocalDate creationDate;
-
+    private LocalDate admisionToAdminDate;
+    private LocalTime admisionToAdminTime;
+    private Integer totalQuestionsAnswered;
+    private Boolean isActive;
 }
-

@@ -34,6 +34,5 @@ public class UserApifyCallHistorial {
             joinColumns = @JoinColumn(name = "historial_id"),
             inverseJoinColumns = @JoinColumn(name = "tiktok_username_id")
     )
-
     private Set<TiktokUsername> tiktokUsernames = new HashSet<>();
 }

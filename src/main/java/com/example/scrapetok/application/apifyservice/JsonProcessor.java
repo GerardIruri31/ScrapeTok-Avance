@@ -3,6 +3,7 @@ package com.example.scrapetok.application.apifyservice;
 import com.example.scrapetok.domain.*;
 import com.example.scrapetok.repository.AdminTikTokMetricsRepository;
 import com.example.scrapetok.repository.TiktokUsernameRepository;
+import com.example.scrapetok.repository.UserApifyCallHistorialRepository;
 import com.example.scrapetok.repository.UserTiktokMetricsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,16 @@ public class JsonProcessor {
     private AdminTikTokMetricsRepository adminTiktokMetricsRepository;
     @Autowired
     private TiktokUsernameRepository tiktokUsernameRepository;
+    @Autowired
+    private UserApifyCallHistorialRepository userApifyCallHistorialRepository;
+
 
     // Logica para User -> Procesar user scraping
-    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, GeneralAccount user, UserApifyCallHistorial historial, UserApifyFilters filter) throws EntityNotFoundException {
+    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, GeneralAccount user, UserApifyCallHistorial historial) throws EntityNotFoundException {
         List<UserTiktokMetrics> metricasList = new ArrayList<>();
         // Evita acumulación de datos de ejecuciones anteriores
         lastProcessedData.clear();
-        if (jsonResponse.isEmpty()) {
+        if (jsonResponse.containsKey("Error")) {
             throw new EntityNotFoundException("No data found");
         }
         //Fecha y hora de Perú
@@ -42,7 +46,7 @@ public class JsonProcessor {
                 .collect(Collectors.toSet());
 
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> items = (List<Map<String, Object>>) jsonResponse.get("data");
+        List<Map<String, Object>> items = (List<Map<String, Object>>) jsonResponse.get("Success");
 
         // Iterar sobre cada elemento del JSON
         for (Map<String,Object> item : items) {
@@ -198,6 +202,9 @@ public class JsonProcessor {
             userTiktokMetricsRepository.saveAll(metricasList);
             int cantTiktokAccountScraped = yaGuardadosPrevios.size();
             historial.setAmountScrappedAccount(cantTiktokAccountScraped);
+            // guardar historial
+            userApifyCallHistorialRepository.save(historial);
+
         }
         return lastProcessedData;
     }
@@ -207,7 +214,7 @@ public class JsonProcessor {
     public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, AdminProfile admin) throws EntityNotFoundException {
         List<AdminTiktokMetrics> metricasList = new ArrayList<>();
         lastProcessedData.clear(); // Evita acumulación de datos de ejecuciones anteriores
-        if (jsonResponse.isEmpty()) {
+        if (jsonResponse.containsKey("Error")) {
             throw new EntityNotFoundException("No data found");
         }
         //Fecha y hora de Perú
@@ -215,7 +222,7 @@ public class JsonProcessor {
         ZoneId zoneId = timeZone.toZoneId();
 
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> items = (List<Map<String, Object>>) jsonResponse.get("data");
+        List<Map<String, Object>> items = (List<Map<String, Object>>) jsonResponse.get("Success");
 
         // Iterar sobre cada elemento del JSON
         for (Map<String,Object> item : items) {
@@ -325,6 +332,7 @@ public class JsonProcessor {
             dataMap.put("Tracking date", fechaTrackeo);
             dataMap.put("Tracking time", horaTrackeo);
             dataMap.put("User", admin.getUser().getUsername());
+            System.out.println("Debug:" + dataMap);
             // Agregar al listado publicación a la lista contenedora de todos.
             lastProcessedData.add(dataMap);
 
