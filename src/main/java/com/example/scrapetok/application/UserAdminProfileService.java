@@ -5,6 +5,7 @@ import com.example.scrapetok.domain.DTO.AdminProfileResponseDTO;
 import com.example.scrapetok.domain.DTO.UserProfileResponseDTO;
 import com.example.scrapetok.domain.enums.ApifyRunStatus;
 import com.example.scrapetok.repository.GeneralAccountRepository;
+import com.example.scrapetok.repository.UserTiktokMetricsRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ public class UserAdminProfileService {
     private GeneralAccountRepository generalAccountRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private UserTiktokMetricsRepository userTiktokMetricsRepository;
 
     public UserProfileResponseDTO getUserProfile(Long userId) throws EntityNotFoundException {
         GeneralAccount user = generalAccountRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("User with id " + " Not Found"));
@@ -31,7 +34,6 @@ public class UserAdminProfileService {
             throw new EntityNotFoundException("Historial not found for user " + userId);
         }
 
-        userProfile.setAmountScrappedAccount(userHistorial.getAmountScrappedAccount() != null ? userHistorial.getAmountScrappedAccount() : 0);
         List<Map<Object,Object>> filterMatrix = new ArrayList<>();
         List<UserApifyFilters> historialFilters = userHistorial.getFiltros();
         for (UserApifyFilters filter: historialFilters) {
@@ -50,13 +52,14 @@ public class UserAdminProfileService {
         userProfile.setFilters(filterMatrix);
 
         Set<String> usernames = new HashSet<>();
-        Set<TiktokUsername> scrapedAccounts = userHistorial.getTiktokUsernames();
-        if (scrapedAccounts != null) {
-            for (TiktokUsername scrapedAccount : scrapedAccounts) {
-                usernames.add(scrapedAccount.getUsername());
+        List<UserTiktokMetrics> getUsernames = userTiktokMetricsRepository.findUsernameTiktokAccountByUserId(userId);
+        if (!getUsernames.isEmpty()) {
+            for (UserTiktokMetrics userMetrics : getUsernames) {
+                usernames.add(userMetrics.getUsernameTiktokAccount());
             }
-        } else usernames = Collections.emptySet();
-        userProfile.setTiktokUsernameScraped(usernames);
+            userProfile.setTiktokUsernameScraped(usernames);
+        }
+        userProfile.setAmountScrappedAccount(usernames.size());
         return userProfile;
     }
 

@@ -92,16 +92,12 @@ public class UserApifyCallService {
         }
 
         // DEBUG: Mostrar el JSON que se enviará
+        System.out.println(jsonInput);
         Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput, filter);
-
-
-        // TODO FUNCIONA
-        // .......
-
         List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial);
 
         // Guardar filter con todos los cambios
-        //userApifyFilterRepository.save(filter);
+        userApifyFilterRepository.save(filter);
         // Guardar UserAccount
         generalAccountRepository.save(user);
         return processedData;

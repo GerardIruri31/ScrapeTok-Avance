@@ -2,7 +2,6 @@ package com.example.scrapetok.application.apifyservice;
 
 import com.example.scrapetok.domain.*;
 import com.example.scrapetok.repository.AdminTikTokMetricsRepository;
-import com.example.scrapetok.repository.TiktokUsernameRepository;
 import com.example.scrapetok.repository.UserApifyCallHistorialRepository;
 import com.example.scrapetok.repository.UserTiktokMetricsRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -13,7 +12,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class JsonProcessor {
@@ -22,8 +20,6 @@ public class JsonProcessor {
     private UserTiktokMetricsRepository userTiktokMetricsRepository;
     @Autowired
     private AdminTikTokMetricsRepository adminTiktokMetricsRepository;
-    @Autowired
-    private TiktokUsernameRepository tiktokUsernameRepository;
     @Autowired
     private UserApifyCallHistorialRepository userApifyCallHistorialRepository;
 
@@ -44,13 +40,6 @@ public class JsonProcessor {
         //Fecha y hora de Perú
         TimeZone timeZone = TimeZone.getTimeZone("America/Lima");
         ZoneId zoneId = timeZone.toZoneId();
-
-
-        // Guardar copia de usernames existentes ANTES de agregar nuevos
-        /*Set<String> yaGuardadosPrevios = historial.getTiktokUsernames().stream()
-                .map(u -> u.getUsername().toLowerCase())
-                .collect(Collectors.toSet());
-         */
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> items = (List<Map<String, Object>>) jsonResponse.get("Success");
@@ -194,29 +183,12 @@ public class JsonProcessor {
                 // Agregar a la lista de METRICASLIST general para la BD
                 metricasList.add(metrica);
 
-
-                // Verificar si ya existe el username en el historial
-
-                /*final String nombreCuentaFinal = nombreCuenta;
-                 boolean yaExiste = yaGuardadosPrevios.contains(nombreCuentaFinal.toLowerCase());
-                if (!yaExiste) {
-                    TiktokUsername nuevo = new TiktokUsername();
-                    nuevo.setUsername(nombreCuentaFinal);
-                    historial.getTiktokUsernames().add(nuevo);
-                    tiktokUsernameRepository.save(nuevo);
-                }*/
             }
         }
         // Guardar en BD cada registro
         if (!metricasList.isEmpty()) {
-
             userTiktokMetricsRepository.saveAll(metricasList);
-
-            //int cantTiktokAccountScraped = yaGuardadosPrevios.size();
-            //historial.setAmountScrappedAccount(cantTiktokAccountScraped);
-
-            // guardar historial
-            //userApifyCallHistorialRepository.save(historial);
+            userApifyCallHistorialRepository.save(historial);
         }
         return lastProcessedData;
     }
