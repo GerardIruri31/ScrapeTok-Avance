@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Transactional
 @Service
 public class UserApifyCallService {
     @Autowired
@@ -33,17 +32,27 @@ public class UserApifyCallService {
     @Autowired
     private ModelMapper modelMapper;
 
+
+    @Transactional
     public List<Map<String,Object>> apifyconnection(UserFiltersRequestDTO request) throws Exception {
         // Obtener usuario que hace request
         GeneralAccount user = generalAccountRepository.findById(request.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
         // Obtener historial del usuario
         UserApifyCallHistorial historial = user.getHistorial();
+        if (historial == null) {
+            historial = new UserApifyCallHistorial();
+            historial.setUser(user);
+            user.setHistorial(historial);
+        }
+
         // Crear nuevo filtro del usuario
         UserApifyFilters filter = modelMapper.map(request, UserApifyFilters.class);
         filter.setId(null);
-        // le asigno historial al que pertenece filtro
         filter.setHistorial(historial);
+        historial.getFiltros().add(filter);
+
 
         // Hacer llamado a APIFY
         Map<String, Object> jsonInput = new HashMap<>();
@@ -87,10 +96,15 @@ public class UserApifyCallService {
         System.out.println("JSON enviado: " + jsonInput);
         Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput, filter);
 
+
+        // TODO FUNCIONA
+        // .......
+
+
         List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial);
 
         // Guardar filter con todos los cambios
-        userApifyFilterRepository.save(filter);
+        //userApifyFilterRepository.save(filter);
         // Guardar UserAccount
         generalAccountRepository.save(user);
         return processedData;

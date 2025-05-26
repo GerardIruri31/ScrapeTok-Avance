@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -31,7 +32,10 @@ public class UserApifyCallController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("❌ Unexpected Error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("❌ Server Error", e.getMessage()));
+            String exceptionName = e.getClass().getSimpleName();
+            String detail = exceptionName + (e.getMessage() != null ? ": " + e.getMessage() : "");
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(Map.of("❌ Server Error", detail));
         }
     }
 }

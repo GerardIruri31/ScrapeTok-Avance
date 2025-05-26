@@ -33,6 +33,11 @@ public class JsonProcessor {
         List<UserTiktokMetrics> metricasList = new ArrayList<>();
         // Evita acumulación de datos de ejecuciones anteriores
         lastProcessedData.clear();
+        if (!jsonResponse.containsKey("Success")
+                || jsonResponse.get("Success") == null) {
+            throw new IllegalStateException(
+                    "Apify no retornó datos válidos en la clave 'Success'");
+        }
         if (jsonResponse.containsKey("Error")) {
             throw new EntityNotFoundException("No data found");
         }
@@ -203,7 +208,7 @@ public class JsonProcessor {
             int cantTiktokAccountScraped = yaGuardadosPrevios.size();
             historial.setAmountScrappedAccount(cantTiktokAccountScraped);
             // guardar historial
-            userApifyCallHistorialRepository.save(historial);
+            //userApifyCallHistorialRepository.save(historial);
         }
         return lastProcessedData;
     }
