@@ -7,10 +7,10 @@ import com.example.scrapetok.domain.DTO.UserQuestionRequestDTO;
 import com.example.scrapetok.domain.GeneralAccount;
 import com.example.scrapetok.domain.QuestAndAnswer;
 import com.example.scrapetok.domain.enums.statusQA;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.GeneralAccountRepository;
 import com.example.scrapetok.repository.QuestionAndAnswerRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +38,7 @@ public class QuestionsAndAnswersService {
     // Usuario hace una pregunta
     public FullAnswerQuestionResponseDTO assignQuestion(UserQuestionRequestDTO request) {
         GeneralAccount user = generalAccountRepository.findById(request.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("No user with ID " + request.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("No user with ID " + request.getUserId()));
 
         QuestAndAnswer questAndAnswer = new QuestAndAnswer();
         questAndAnswer.setUser(user);
@@ -70,11 +70,11 @@ public class QuestionsAndAnswersService {
 
 
     // Admin responde una pregunta
-    public FullAnswerQuestionResponseDTO replyQuestion(AdminAnswerRequestDTO request) throws EntityNotFoundException, ResponseStatusException {
-        AdminProfile admin = adminProfileRepository.findById(request.getAdminId()).orElseThrow(() -> new EntityNotFoundException("No admin with ID " + request.getAdminId()));
-        QuestAndAnswer questAndAnswer = questionAndAnswerRepository.findById(request.getQuestionId()).orElseThrow(()-> new EntityNotFoundException("No question with ID " + request.getQuestionId()));
+    public FullAnswerQuestionResponseDTO replyQuestion(AdminAnswerRequestDTO request) throws ResourceNotFoundException, ResponseStatusException {
+        AdminProfile admin = adminProfileRepository.findById(request.getAdminId()).orElseThrow(() -> new ResourceNotFoundException("No admin with ID " + request.getAdminId()));
+        QuestAndAnswer questAndAnswer = questionAndAnswerRepository.findById(request.getQuestionId()).orElseThrow(()-> new ResourceNotFoundException("No question with ID " + request.getQuestionId()));
         if (questAndAnswer.getStatus() == statusQA.ANSWERED) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "This question has already been answered.");
+            throw new IllegalStateException("This question has already been answered.");
         }
         questAndAnswer.setAnswerDescription(request.getAnswerDescription());
         questAndAnswer.setAdmin(admin);

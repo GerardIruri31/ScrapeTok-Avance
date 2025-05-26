@@ -4,9 +4,9 @@ import com.example.scrapetok.domain.*;
 import com.example.scrapetok.domain.DTO.AdminProfileResponseDTO;
 import com.example.scrapetok.domain.DTO.UserProfileResponseDTO;
 import com.example.scrapetok.domain.enums.ApifyRunStatus;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.GeneralAccountRepository;
 import com.example.scrapetok.repository.UserTiktokMetricsRepository;
-import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +22,8 @@ public class UserAdminProfileService {
     @Autowired
     private UserTiktokMetricsRepository userTiktokMetricsRepository;
 
-    public UserProfileResponseDTO getUserProfile(Long userId) throws EntityNotFoundException {
-        GeneralAccount user = generalAccountRepository.findById(userId).orElseThrow(()->new EntityNotFoundException("User with id " + " Not Found"));
+    public UserProfileResponseDTO getUserProfile(Long userId) throws ResourceNotFoundException {
+        GeneralAccount user = generalAccountRepository.findById(userId).orElseThrow(()->new ResourceNotFoundException("User with id " + " Not Found"));
         UserProfileResponseDTO userProfile = modelMapper.map(user, UserProfileResponseDTO.class);
 
         UserApifyCallHistorial userHistorial = user.getHistorial();
@@ -31,7 +31,7 @@ public class UserAdminProfileService {
             userProfile.setAmountScrappedAccount(0);
             userProfile.setFilters(new ArrayList<>());
             userProfile.setTiktokUsernameScraped(Collections.emptySet());
-            throw new EntityNotFoundException("Historial not found for user " + userId);
+            throw new ResourceNotFoundException("Historial not found for user " + userId);
         }
 
         List<Map<Object,Object>> filterMatrix = new ArrayList<>();
@@ -64,8 +64,8 @@ public class UserAdminProfileService {
     }
 
 
-    public AdminProfileResponseDTO getAdminProfile(Long adminId) throws EntityNotFoundException {
-        GeneralAccount user = generalAccountRepository.findById(adminId).orElseThrow(()-> new EntityNotFoundException("User with id " + " Not Found"));
+    public AdminProfileResponseDTO getAdminProfile(Long adminId) throws ResourceNotFoundException  {
+        GeneralAccount user = generalAccountRepository.findById(adminId).orElseThrow(()-> new ResourceNotFoundException ("User with id " + " Not Found"));
         AdminProfileResponseDTO userProfile = modelMapper.map(user, AdminProfileResponseDTO.class);
         AdminProfile admin = user.getAdmin();
         if (admin == null) {

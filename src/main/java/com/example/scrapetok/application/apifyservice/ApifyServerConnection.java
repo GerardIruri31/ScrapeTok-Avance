@@ -2,6 +2,7 @@ package com.example.scrapetok.application.apifyservice;
 
 import com.example.scrapetok.domain.UserApifyFilters;
 import com.example.scrapetok.domain.enums.ApifyRunStatus;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.UserApifyFilterRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
@@ -20,7 +21,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class ApifyServerConnection {
 
     // Lógica para user -> user scraping
-    public Map<String,Object> fetchDataFromApify(Map<String,Object> jsonInput, UserApifyFilters filter) throws IOException, EntityNotFoundException, IllegalStateException {
+    public Map<String,Object> fetchDataFromApify(Map<String,Object> jsonInput, UserApifyFilters filter) throws IOException, ResourceNotFoundException, IllegalStateException {
         // Inicio contador
         long inicio = System.currentTimeMillis();
         // Convertir el diccionario a un JSON usando Jackson
@@ -84,7 +85,7 @@ public class ApifyServerConnection {
 
 
     // Lógica para administrador -> scraping general
-    public Map<String,Object> fetchDataFromApify(Map<String,Object> jsonInput) throws IOException, EntityNotFoundException, IllegalStateException {
+    public Map<String,Object> fetchDataFromApify(Map<String,Object> jsonInput) throws IOException, ResourceNotFoundException, IllegalStateException {
         // Convertir el diccionario a un JSON usando Jackson
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody = objectMapper.writeValueAsString(jsonInput);

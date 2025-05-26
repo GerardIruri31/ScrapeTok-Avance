@@ -1,7 +1,7 @@
 package com.example.scrapetok.infraestructure;
 
 import com.example.scrapetok.application.UserAdminProfileService;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +17,7 @@ public class UserInformationController {
     private UserAdminProfileService userAdminProfileService;
 
     @GetMapping("/profile/{userId}")
-    public ResponseEntity<?> profile(@PathVariable Long userId) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(userAdminProfileService.getUserProfile(userId));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Entity Error: " +e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " +e.getMessage());
-        }
+    public ResponseEntity<?> profile(@PathVariable @NotNull Long userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(userAdminProfileService.getUserProfile(userId));
     }
 }

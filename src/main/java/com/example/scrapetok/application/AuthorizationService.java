@@ -5,12 +5,14 @@ import com.example.scrapetok.domain.DTO.*;
 import com.example.scrapetok.domain.GeneralAccount;
 import com.example.scrapetok.domain.UserApifyCallHistorial;
 import com.example.scrapetok.domain.enums.Role;
+import com.example.scrapetok.exception.EmailAlreadyInUseException;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.GeneralAccountRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
@@ -26,15 +28,19 @@ public class AuthorizationService {
     @Autowired
     private AdminProfileRepository adminProfileRepository;
 
-    public UserSignUpResponseDTO createUser(UserSignUpRequestDTO request) throws EntityNotFoundException, IllegalArgumentException {
+    public UserSignUpResponseDTO createUser(UserSignUpRequestDTO request) {
         GeneralAccount newUser = modelMapper.map(request, GeneralAccount.class);
         ZonedDateTime zonedDateTime = obtenerFechaPeru();
         newUser.setCreationDate(zonedDateTime.toLocalDate());
         UserApifyCallHistorial historial = new UserApifyCallHistorial();
         historial.setUser(newUser);
         newUser.setHistorial(historial);
-        GeneralAccount saved = generalAccountRepository.save(newUser);
-        return modelMapper.map(saved, UserSignUpResponseDTO.class);
+        try {
+            GeneralAccount saved = generalAccountRepository.save(newUser);
+            return modelMapper.map(saved, UserSignUpResponseDTO.class);
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailAlreadyInUseException("Email is already in use");
+        }
     }
 
 
@@ -47,7 +53,6 @@ public class AuthorizationService {
         UserApifyCallHistorial historial = new UserApifyCallHistorial();
         historial.setUser(newUser);
         newUser.setHistorial(historial);
-
 
         AdminProfile adminProfile = new AdminProfile();
         adminProfile.setUser(newUser);
@@ -66,11 +71,11 @@ public class AuthorizationService {
     public UpgradeToAdminResponseDTO upgrade(UpgradeToAdminRequestDTO request) {
         // Verifica que el admin que está promoviendo exista
         AdminProfile admin = adminProfileRepository.findById(request.getAdminId())
-                .orElseThrow(() -> new EntityNotFoundException("Admin with id " + request.getAdminId() + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Admin with id " + request.getAdminId() + " not found"));
 
         // Verifica que el usuario a promover exista
         GeneralAccount user = generalAccountRepository.findById(request.getUserid())
-                .orElseThrow(() -> new EntityNotFoundException("User with id " + request.getUserid() + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + request.getUserid() + " not found"));
 
         if (user.getRole() == Role.ADMIN)
             throw new IllegalStateException("⚠️ This user is already an admin.");
@@ -78,16 +83,12 @@ public class AuthorizationService {
         // Crear nuevo perfil de admin
         AdminProfile nuevoAdmin = new AdminProfile();
         nuevoAdmin.setUser(user);
-
         ZonedDateTime zonedDateTime = obtenerFechaPeru();
         nuevoAdmin.setAdmisionToAdminDate(zonedDateTime.toLocalDate());
         nuevoAdmin.setAdmisionToAdminTime(zonedDateTime.toLocalTime());
-
         user.setRole(Role.ADMIN);
-
         adminProfileRepository.save(nuevoAdmin);
         generalAccountRepository.save(user);
-
         UpgradeToAdminResponseDTO responseDTO = new UpgradeToAdminResponseDTO();
         modelMapper.map(user, responseDTO);
         modelMapper.map(nuevoAdmin, responseDTO);

@@ -5,11 +5,11 @@ import com.example.scrapetok.domain.AdminProfile;
 import com.example.scrapetok.domain.DTO.TopGlobalEmailDTO;
 import com.example.scrapetok.domain.DailyAlerts;
 import com.example.scrapetok.domain.GeneralAccount;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.DailyAlertsRepository;
 import com.example.scrapetok.repository.GeneralAccountRepository;
 import com.google.common.collect.Lists;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -32,11 +32,21 @@ public class TopGlobalEmailService {
     @Autowired
     private ApplicationEventPublisher applicationEventPublisher;
 
-    public void sendTopGlobalTextEmail(List<TopGlobalEmailDTO> posts) throws EntityNotFoundException, IllegalArgumentException {
+    public void sendTopGlobalTextEmail(List<TopGlobalEmailDTO> posts) throws ResourceNotFoundException, IllegalArgumentException {
+        if (posts == null || posts.isEmpty()) {
+            throw new IllegalArgumentException("La lista de publicaciones está vacía.");
+        }
+        Long adminId = posts.get(0).getAdminId();
+        AdminProfile admin =  adminProfileRepository.findById(adminId).orElseThrow(() -> new ResourceNotFoundException("Admin with id " + adminId + " Not Found"));
+        List<GeneralAccount> users = generalAccountRepository.findAll();
+        if (users.isEmpty()) {
+            throw new ResourceNotFoundException("No hay usuarios registrados para recibir el correo.");
+        }
+
         String subject = "ScrapeTok: 🌍 Today’s Top Global TikTok Hits by Hashtag / KeyWord";
         StringBuilder body = new StringBuilder();
         body.append("Hello!\n\n");
-        body.append("Here are today's top viral TikToks by hashtag. Discover what’s trending globally now:\n\n");
+        body.append("Here are today's top viral TikToks by hashtag / keyWord. Discover what’s trending globally now:\n\n");
 
         for (TopGlobalEmailDTO post : posts) {
             body.append("🔹 #").append(post.getUsedHashTag()).append("\n");
@@ -52,9 +62,7 @@ public class TopGlobalEmailService {
         body.append("This summary is generated automatically based on latest top-performing global content.\n");
         body.append("Your ScrapeTok Team");
 
-        Long adminId = posts.get(0).getAdminId();
-        AdminProfile admin =  adminProfileRepository.findById(adminId).orElseThrow(() -> new EntityNotFoundException("Admin with id " + adminId + " Not Found"));
-        List<GeneralAccount> users = generalAccountRepository.findAll();
+
         DailyAlerts alert = new DailyAlerts();
         alert.setUserEmails(new HashSet<>(users));
         alert.setAdmin(admin);
@@ -65,6 +73,7 @@ public class TopGlobalEmailService {
         alert.setPostedTime(zonedDateTime.toLocalTime().withNano(0));
         dailyAlertsRepository.save(alert);
         adminProfileRepository.save(admin);
+
 
         // Dividir en batches de 50 usuarios
         List<List<GeneralAccount>> batches = Lists.partition(users,50);

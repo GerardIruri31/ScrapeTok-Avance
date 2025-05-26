@@ -6,10 +6,10 @@ import com.example.scrapetok.domain.GeneralAccount;
 import com.example.scrapetok.domain.UserApifyCallHistorial;
 import com.example.scrapetok.domain.UserApifyFilters;
 import com.example.scrapetok.domain.DTO.UserFiltersRequestDTO;
+import com.example.scrapetok.exception.ApifyConnectionException;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.GeneralAccountRepository;
-import com.example.scrapetok.repository.UserApifyCallHistorialRepository;
 import com.example.scrapetok.repository.UserApifyFilterRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +34,10 @@ public class UserApifyCallService {
 
 
     @Transactional
-    public List<Map<String,Object>> apifyconnection(UserFiltersRequestDTO request) throws Exception {
+    public List<Map<String,Object>> apifyconnection(UserFiltersRequestDTO request) {
         // Obtener usuario que hace request
         GeneralAccount user = generalAccountRepository.findById(request.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         // Obtener historial del usuario
         UserApifyCallHistorial historial = user.getHistorial();
@@ -93,9 +93,17 @@ public class UserApifyCallService {
 
         // DEBUG: Mostrar el JSON que se enviará
         System.out.println(jsonInput);
-        Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput, filter);
-        List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial);
 
+        // Hacer llamado a APIFY
+        Map<String, Object> ApifyResponse;
+        try {
+            ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput, filter);
+        } catch (Exception e) {
+            throw new ApifyConnectionException("Could not connect to the Apify server.");
+        }
+
+        // Procesar data extraída de APIFY
+        List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial);
         // Guardar filter con todos los cambios
         userApifyFilterRepository.save(filter);
         // Guardar UserAccount

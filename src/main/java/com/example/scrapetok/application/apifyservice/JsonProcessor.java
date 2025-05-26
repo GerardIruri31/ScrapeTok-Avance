@@ -1,6 +1,7 @@
 package com.example.scrapetok.application.apifyservice;
 
 import com.example.scrapetok.domain.*;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.AdminTikTokMetricsRepository;
 import com.example.scrapetok.repository.UserApifyCallHistorialRepository;
 import com.example.scrapetok.repository.UserTiktokMetricsRepository;
@@ -25,7 +26,7 @@ public class JsonProcessor {
 
 
     // Logica para User -> Procesar user scraping
-    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, GeneralAccount user, UserApifyCallHistorial historial) throws EntityNotFoundException {
+    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, GeneralAccount user, UserApifyCallHistorial historial) throws ResourceNotFoundException {
         List<UserTiktokMetrics> metricasList = new ArrayList<>();
         // Evita acumulación de datos de ejecuciones anteriores
         lastProcessedData.clear();
@@ -35,7 +36,7 @@ public class JsonProcessor {
                     "Apify no retornó datos válidos en la clave 'Success'");
         }
         if (jsonResponse.containsKey("Error")) {
-            throw new EntityNotFoundException("No data found");
+            throw new ResourceNotFoundException("No data found");
         }
         //Fecha y hora de Perú
         TimeZone timeZone = TimeZone.getTimeZone("America/Lima");
@@ -63,7 +64,6 @@ public class JsonProcessor {
                 Map<String, Object> authorMeta = (Map<String, Object>) item.get("authorMeta");
                 nombreCuenta = authorMeta.containsKey("name") ? authorMeta.get("name").toString() : cuentaInexistente;
                 region = authorMeta.containsKey("region") ? authorMeta.get("region").toString() : "Not found: N/A";
-
             }
 
             // Datos del video
@@ -195,11 +195,11 @@ public class JsonProcessor {
 
 
     // Logica para Admin -> Procesar admin scraping
-    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, AdminProfile admin) throws EntityNotFoundException {
+    public List<Map<String, Object>> processJson(Map<String,Object> jsonResponse, AdminProfile admin) throws ResourceNotFoundException {
         List<AdminTiktokMetrics> metricasList = new ArrayList<>();
         lastProcessedData.clear(); // Evita acumulación de datos de ejecuciones anteriores
         if (jsonResponse.containsKey("Error")) {
-            throw new EntityNotFoundException("No data found");
+            throw new ResourceNotFoundException("No data found");
         }
         //Fecha y hora de Perú
         TimeZone timeZone = TimeZone.getTimeZone("America/Lima");
