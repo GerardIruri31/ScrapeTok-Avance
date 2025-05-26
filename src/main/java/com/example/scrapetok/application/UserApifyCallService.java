@@ -51,7 +51,6 @@ public class UserApifyCallService {
         UserApifyFilters filter = modelMapper.map(request, UserApifyFilters.class);
         filter.setId(null);
         filter.setHistorial(historial);
-        historial.getFiltros().add(filter);
 
 
         // Hacer llamado a APIFY
@@ -93,13 +92,11 @@ public class UserApifyCallService {
         }
 
         // DEBUG: Mostrar el JSON que se enviará
-        System.out.println("JSON enviado: " + jsonInput);
         Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput, filter);
 
 
         // TODO FUNCIONA
         // .......
-
 
         List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial);
 

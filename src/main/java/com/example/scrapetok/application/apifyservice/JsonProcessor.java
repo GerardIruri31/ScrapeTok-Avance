@@ -45,10 +45,12 @@ public class JsonProcessor {
         TimeZone timeZone = TimeZone.getTimeZone("America/Lima");
         ZoneId zoneId = timeZone.toZoneId();
 
+
         // Guardar copia de usernames existentes ANTES de agregar nuevos
-        Set<String> yaGuardadosPrevios = historial.getTiktokUsernames().stream()
+        /*Set<String> yaGuardadosPrevios = historial.getTiktokUsernames().stream()
                 .map(u -> u.getUsername().toLowerCase())
                 .collect(Collectors.toSet());
+         */
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> items = (List<Map<String, Object>>) jsonResponse.get("Success");
@@ -77,7 +79,7 @@ public class JsonProcessor {
 
             // Datos del video
             String linkVideo = item.getOrDefault("webVideoUrl","Not found: N/A").toString();
-            String postcode = linkVideo.equals("Not found: N/A") ? linkVideo.substring(linkVideo.lastIndexOf("/") + 1) : "Not found: N/A";
+            String postcode = (!linkVideo.equals("Not found: N/A")) ? linkVideo.substring(linkVideo.lastIndexOf("/") + 1) : "Not found: N/A";
             String fechaHoraVideo = item.getOrDefault("createTimeISO","Not found: N/A").toString();
             LocalDate fechaVideo;
             LocalTime horaVideo;
@@ -161,12 +163,13 @@ public class JsonProcessor {
             dataMap.put("Tracking date", fechaTrackeo);
             dataMap.put("Tracking time", horaTrackeo);
             dataMap.put("User", user.getUsername());
+            System.out.println(dataMap);
 
             // Agregar al listado publicación a la lista contenedora de todos.
             lastProcessedData.add(dataMap);
 
             // Setter de todos los atributos para BD
-            if (postcode.equals("Not found: N/A") && fechaVideo != null) {
+            if ((!postcode.equals("Not found: N/A")) && fechaVideo != null) {
                 metrica.setPostId(postcode);
                 metrica.setDatePosted(fechaVideo);
                 metrica.setHourPosted(horaVideo);
@@ -191,22 +194,27 @@ public class JsonProcessor {
                 // Agregar a la lista de METRICASLIST general para la BD
                 metricasList.add(metrica);
 
+
                 // Verificar si ya existe el username en el historial
-                final String nombreCuentaFinal = nombreCuenta;
-                boolean yaExiste = yaGuardadosPrevios.contains(nombreCuentaFinal.toLowerCase());
+
+                /*final String nombreCuentaFinal = nombreCuenta;
+                 boolean yaExiste = yaGuardadosPrevios.contains(nombreCuentaFinal.toLowerCase());
                 if (!yaExiste) {
                     TiktokUsername nuevo = new TiktokUsername();
                     nuevo.setUsername(nombreCuentaFinal);
                     historial.getTiktokUsernames().add(nuevo);
                     tiktokUsernameRepository.save(nuevo);
-                }
+                }*/
             }
         }
         // Guardar en BD cada registro
         if (!metricasList.isEmpty()) {
+
             userTiktokMetricsRepository.saveAll(metricasList);
-            int cantTiktokAccountScraped = yaGuardadosPrevios.size();
-            historial.setAmountScrappedAccount(cantTiktokAccountScraped);
+
+            //int cantTiktokAccountScraped = yaGuardadosPrevios.size();
+            //historial.setAmountScrappedAccount(cantTiktokAccountScraped);
+
             // guardar historial
             //userApifyCallHistorialRepository.save(historial);
         }
