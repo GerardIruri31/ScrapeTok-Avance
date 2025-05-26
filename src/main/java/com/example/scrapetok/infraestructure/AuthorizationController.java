@@ -18,45 +18,22 @@ public class AuthorizationController {
     private AuthorizationService authorizationService;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> userRegistration(@RequestBody @Valid UserSignUpRequestDTO request) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(authorizationService.createUser(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ Client Error : " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " + e.getMessage());
-        }
+    public ResponseEntity<?> userRegistration(@RequestBody @Valid UserSignUpRequestDTO request){
+        return ResponseEntity.status(HttpStatus.CREATED).body(authorizationService.createUser(request));
     }
 
 
     @PostMapping("/signupadmin")
     public ResponseEntity<?> adminRegistration(@RequestBody @Valid UserSignUpRequestDTO request) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(authorizationService.createAdmin(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ Client Error : " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " + e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(authorizationService.createAdmin(request));
     }
 
     // Falta SignIn
 
-
-
     // Admin concede rol de admin a User
     @PatchMapping("/upgradetoadmin")
     public ResponseEntity<?> upgradeToAdmin(@RequestBody @Valid UpgradeToAdminRequestDTO request) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(authorizationService.upgrade(request));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ Client Error : " + e.getMessage());
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Entity Error : " + e.getMessage());
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " + e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(authorizationService.upgrade(request));
     }
 
 

@@ -18,15 +18,6 @@ public class AnswersController {
 
     @PatchMapping("/answerQuestion")
     public ResponseEntity<?> answerQuestion(@RequestBody @Valid AdminAnswerRequestDTO request) {
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(questionsAndAnswersService.replyQuestion(request));
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(e.getStatusCode()).body("⚠️ Warning: " + e.getMessage());
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Entity Error: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " + e.getMessage() + ". Details: " + e.getCause());
-        }
+        return ResponseEntity.status(200).body(questionsAndAnswersService.replyQuestion(request));
     }
-
 }

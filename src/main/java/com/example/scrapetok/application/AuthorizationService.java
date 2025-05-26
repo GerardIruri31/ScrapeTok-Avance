@@ -7,7 +7,7 @@ import com.example.scrapetok.domain.UserApifyCallHistorial;
 import com.example.scrapetok.domain.enums.Role;
 import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.GeneralAccountRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class AuthorizationService {
     @Autowired
     private AdminProfileRepository adminProfileRepository;
 
-    public UserSignUpResponseDTO createUser(UserSignUpRequestDTO request) throws EntityNotFoundException, IllegalArgumentException {
+    public UserSignUpResponseDTO createUser(UserSignUpRequestDTO request) throws ResourceNotFoundException, IllegalArgumentException {
         GeneralAccount newUser = modelMapper.map(request, GeneralAccount.class);
         ZonedDateTime zonedDateTime = obtenerFechaPeru();
         newUser.setCreationDate(zonedDateTime.toLocalDate());
@@ -66,11 +66,11 @@ public class AuthorizationService {
     public UpgradeToAdminResponseDTO upgrade(UpgradeToAdminRequestDTO request) {
         // Verifica que el admin que está promoviendo exista
         AdminProfile admin = adminProfileRepository.findById(request.getAdminId())
-                .orElseThrow(() -> new EntityNotFoundException("Admin with id " + request.getAdminId() + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Admin with id " + request.getAdminId() + " not found"));
 
         // Verifica que el usuario a promover exista
         GeneralAccount user = generalAccountRepository.findById(request.getUserid())
-                .orElseThrow(() -> new EntityNotFoundException("User with id " + request.getUserid() + " not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User with id " + request.getUserid() + " not found"));
 
         if (user.getRole() == Role.ADMIN)
             throw new IllegalStateException("⚠️ This user is already an admin.");

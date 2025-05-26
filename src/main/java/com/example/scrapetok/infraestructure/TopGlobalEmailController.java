@@ -19,15 +19,7 @@ public class TopGlobalEmailController {
 
     @PostMapping("/sendemail")
     public ResponseEntity<String> sendEmail(@RequestBody @Valid List<TopGlobalEmailDTO> request) {
-        try {
-            topGlobalEmailService.sendTopGlobalTextEmail(request);
-            return ResponseEntity.status(HttpStatus.OK).body("✅ Top daily global emails have been sent successfully.\"");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("❌ Client Error: " + e.getMessage());
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Entity Error: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Failed to send top global emails: " + e.getMessage());
-        }
+        topGlobalEmailService.sendTopGlobalTextEmail(request);
+        return ResponseEntity.ok("✅ Top daily global emails have been sent successfully.");
     }
 }

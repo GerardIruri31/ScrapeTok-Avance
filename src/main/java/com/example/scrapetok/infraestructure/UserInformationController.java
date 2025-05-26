@@ -18,12 +18,6 @@ public class UserInformationController {
 
     @GetMapping("/profile/{userId}")
     public ResponseEntity<?> profile(@PathVariable Long userId) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(userAdminProfileService.getUserProfile(userId));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("❌ Entity Error: " +e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Server Error: " +e.getMessage());
+        return ResponseEntity.ok(userAdminProfileService.getUserProfile(userId));
         }
     }
-}

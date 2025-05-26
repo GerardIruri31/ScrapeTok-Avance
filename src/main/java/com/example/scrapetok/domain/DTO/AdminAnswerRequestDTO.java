@@ -4,16 +4,17 @@ import com.example.scrapetok.domain.enums.statusQA;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class AdminAnswerRequestDTO {
-    @NotBlank
+    @NotNull
     @Enumerated(EnumType.STRING)
     private statusQA status;
-    @NotBlank
+    @NotNull
     private Long questionId;
-    @NotBlank
+    @NotNull
     private Long adminId;
     @NotBlank
     private String answerDescription;

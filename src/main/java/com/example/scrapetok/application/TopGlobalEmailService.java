@@ -5,6 +5,7 @@ import com.example.scrapetok.domain.AdminProfile;
 import com.example.scrapetok.domain.DTO.TopGlobalEmailDTO;
 import com.example.scrapetok.domain.DailyAlerts;
 import com.example.scrapetok.domain.GeneralAccount;
+import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.DailyAlertsRepository;
 import com.example.scrapetok.repository.GeneralAccountRepository;
@@ -33,6 +34,18 @@ public class TopGlobalEmailService {
     private ApplicationEventPublisher applicationEventPublisher;
 
     public void sendTopGlobalTextEmail(List<TopGlobalEmailDTO> posts) throws EntityNotFoundException, IllegalArgumentException {
+        if (posts == null || posts.isEmpty()) {
+            throw new IllegalArgumentException("La lista de publicaciones está vacía.");
+        }
+        Long adminId = posts.get(0).getAdminId();
+        AdminProfile admin = adminProfileRepository.findById(adminId)
+                .orElseThrow(() -> new ResourceNotFoundException("Admin with id " + adminId + " Not Found"));
+
+        List<GeneralAccount> users = generalAccountRepository.findAll();
+        if (users.isEmpty()) {
+            throw new ResourceNotFoundException("No hay usuarios registrados para recibir el correo.");
+        }
+
         String subject = "🌍 Today’s Top Global TikTok Hits by Hashtag";
         StringBuilder body = new StringBuilder();
         body.append("Hello!\n\n");
@@ -52,9 +65,6 @@ public class TopGlobalEmailService {
         body.append("This summary is generated automatically based on top-performing global content.\n");
         body.append("Your ScrapeTok Team");
 
-        Long adminId = posts.get(0).getAdminId();
-        AdminProfile admin =  adminProfileRepository.findById(adminId).orElseThrow(() -> new EntityNotFoundException("Admin with id " + adminId + " Not Found"));
-        List<GeneralAccount> users = generalAccountRepository.findAll();
         DailyAlerts alert = new DailyAlerts();
         alert.setUserEmails(new HashSet<>(users));
         alert.setAdmin(admin);

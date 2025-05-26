@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class AdminFilterRequestDTO {
-    @NotBlank
+    @NotNull
     private Long adminId;
     // Separador en string -> ','
     @NotBlank

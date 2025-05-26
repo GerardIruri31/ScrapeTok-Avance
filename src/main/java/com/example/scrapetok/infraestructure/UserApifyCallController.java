@@ -22,20 +22,6 @@ public class UserApifyCallController {
 
     @PostMapping("/apifycall")
     public ResponseEntity<?> makeApifyCall(@RequestBody @Valid UserFiltersRequestDTO request) {
-        try {
-            // Retorna List<Map<String,Object>
-            return ResponseEntity.ok(userApifyCallService.apifyconnection(request));
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("❌ Apify Error", "Could not connect to the Apify server. Please try again."));
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("❌ Unexpected Error", e.getMessage()));
-        } catch (Exception e) {
-            String exceptionName = e.getClass().getSimpleName();
-            String detail = exceptionName + (e.getMessage() != null ? ": " + e.getMessage() : "");
-            return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
-                    .body(Map.of("❌ Server Error", detail));
-        }
+        return ResponseEntity.ok(userApifyCallService.apifyconnection(request));
     }
 }

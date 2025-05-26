@@ -5,6 +5,9 @@ import com.example.scrapetok.application.apifyservice.JsonProcessor;
 import com.example.scrapetok.domain.AdminProfile;
 import com.example.scrapetok.domain.DTO.AdminFilterRequestDTO;
 import com.example.scrapetok.domain.DTO.HashtagTrendDTO;
+import com.example.scrapetok.exception.ApifyConnectionException;
+import com.example.scrapetok.exception.ResourceNotFoundException;
+import com.example.scrapetok.exception.ServiceUnavailableException;
 import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.AdminTikTokMetricsRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -29,9 +32,10 @@ public class AdminApifyCallService {
     private AdminProfileRepository adminProfileRepository;
 
     public List<Object> apifyconnection(AdminFilterRequestDTO request) throws Exception {
-        List<Object> dataSet = new ArrayList<>();
+        try {
+            List<Object> dataSet = new ArrayList<>();
         AdminProfile admin = adminProfileRepository.findById(request.getAdminId())
-                .orElseThrow(() -> new EntityNotFoundException("Admin not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Admin con ID " + request.getAdminId() + " no encontrado"));
 
         // Hacer llamado a APIFY
         Map<String, Object> jsonInput = new HashMap<>();
@@ -48,8 +52,12 @@ public class AdminApifyCallService {
         System.out.println("JSON enviado: " + jsonInput);
 
         // HACER LLAMADO A APIFY
-        Map<String, Object> ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput);
-
+        Map<String, Object> ApifyResponse;
+        try {
+            ApifyResponse = apifyServerConnection.fetchDataFromApify(jsonInput);
+        } catch (Exception e) {
+            throw new ApifyConnectionException("Error al conectar con Apify: " + e.getMessage());
+        }
         // PROCESAR DATOS Y GUARDAR EN BD
         List<Map<String, Object>> data = jsonProcessor.processJson(ApifyResponse, admin);
         dataSet.add(data);
@@ -66,5 +74,12 @@ public class AdminApifyCallService {
 
         return dataSet;
     }
+        catch (ApifyConnectionException | ResourceNotFoundException | ServiceUnavailableException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceUnavailableException("Error inesperado en el servicio AdminApifyCallService: " + e.getMessage());
+        }
+    }
+
 }
 
