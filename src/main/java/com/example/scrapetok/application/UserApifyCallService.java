@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 @Transactional
 @Service
 public class UserApifyCallService {
-
     @Autowired
     private UserApifyFilterRepository userApifyFilterRepository;
     @Autowired
@@ -90,10 +89,10 @@ public class UserApifyCallService {
 
         List<Map<String, Object>> processedData = jsonProcessor.processJson(ApifyResponse, user, historial);
 
+        // Guardar filter con todos los cambios
+        userApifyFilterRepository.save(filter);
         // Guardar UserAccount
         generalAccountRepository.save(user);
-        // GUARDO FILTRO
-        userApifyFilterRepository.save(filter);
         return processedData;
     }
 }

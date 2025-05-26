@@ -2,6 +2,7 @@ package com.example.scrapetok.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,12 +10,15 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
+@EqualsAndHashCode(exclude = "user")
+
 @Data
 public class UserApifyCallHistorial {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     private Long id;
+
 
     @OneToOne
     @MapsId
@@ -34,5 +38,6 @@ public class UserApifyCallHistorial {
             joinColumns = @JoinColumn(name = "historial_id"),
             inverseJoinColumns = @JoinColumn(name = "tiktok_username_id")
     )
+
     private Set<TiktokUsername> tiktokUsernames = new HashSet<>();
 }

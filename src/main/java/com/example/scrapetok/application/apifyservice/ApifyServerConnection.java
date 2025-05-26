@@ -50,6 +50,7 @@ public class ApifyServerConnection {
                 ? conn.getInputStream()
                 : conn.getErrorStream();
 
+
         try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             StringBuilder response = new StringBuilder();
             String inputLine;
@@ -58,6 +59,10 @@ public class ApifyServerConnection {
             }
 
             Map<String, Object> responseMap = objectMapper.readValue(response.toString(), new TypeReference<>() {});
+            String prettyJson = objectMapper
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(responseMap);
+            System.out.println(prettyJson);
 
             // Fin del contador
             long fin = System.currentTimeMillis();

@@ -204,7 +204,6 @@ public class JsonProcessor {
             historial.setAmountScrappedAccount(cantTiktokAccountScraped);
             // guardar historial
             userApifyCallHistorialRepository.save(historial);
-
         }
         return lastProcessedData;
     }

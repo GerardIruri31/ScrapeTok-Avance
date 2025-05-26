@@ -5,11 +5,14 @@ import com.example.scrapetok.domain.enums.Role;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @Data
+@EqualsAndHashCode(exclude = "historial")
+
 @Entity
 public class GeneralAccount {
     @Id
