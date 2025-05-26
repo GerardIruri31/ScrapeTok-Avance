@@ -232,7 +232,7 @@ public class JsonProcessor {
 
             // Datos del video
             String linkVideo = item.getOrDefault("webVideoUrl","Not found: N/A").toString();
-            String postcode = linkVideo.equals("Not found: N/A") ? linkVideo.substring(linkVideo.lastIndexOf("/") + 1) : "Not found: N/A";
+            String postcode = !(linkVideo.equals("Not found: N/A")) ? linkVideo.substring(linkVideo.lastIndexOf("/") + 1) : "Not found: N/A";
             String fechaHoraVideo = item.getOrDefault("createTimeISO","Not found: N/A").toString();
             LocalDate fechaVideo;
             LocalTime horaVideo;
@@ -315,13 +315,13 @@ public class JsonProcessor {
             dataMap.put("Region of posting", region);
             dataMap.put("Tracking date", fechaTrackeo);
             dataMap.put("Tracking time", horaTrackeo);
-            dataMap.put("User", admin.getUser().getUsername());
+            dataMap.put("Admin", admin.getUser().getUsername());
             System.out.println("Debug:" + dataMap);
             // Agregar al listado publicación a la lista contenedora de todos.
             lastProcessedData.add(dataMap);
 
             // Setter de todos los atributos para BD
-            if (postcode.equals("Not found: N/A") && fechaVideo != null) {
+            if ((!postcode.equals("Not found: N/A")) && fechaVideo != null) {
                 metrica.setPostId(postcode);
                 metrica.setDatePosted(fechaVideo);
                 metrica.setHourPosted(horaVideo);

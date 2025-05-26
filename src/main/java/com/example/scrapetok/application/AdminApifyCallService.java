@@ -41,8 +41,23 @@ public class AdminApifyCallService {
         jsonInput.put("excludePinnedPosts", true);
         // Por defecto, ADMIN scrapea 20 videos por hashtags
         jsonInput.put("resultsPerPage", 10);
-        List<String> hashtags = Arrays.stream(request.getHashtags().split(",")).map(String::trim).collect(Collectors.toList());
-        jsonInput.put("hashtags", hashtags);
+        List<String> video = new ArrayList<>();
+        video.add("videos");
+        jsonInput.put("profileScrapeSections",video);
+        jsonInput.put("profileSorting","latest");
+
+
+        if (request.getHashtags() != null) {
+            List<String> hashtags = Arrays.stream(request.getHashtags().split(",")).map(String::trim).collect(Collectors.toList());
+            jsonInput.put("hashtags", hashtags);
+        }
+
+        // Admin scrapea por h
+        if (request.getKeyWords() != null) {
+            List<String> keywords = Arrays.stream(request.getKeyWords().split(",")).map(String::trim).collect(Collectors.toList());
+            jsonInput.put("searchQueries", keywords);
+        }
+
 
         // DEBUG: Mostrar el JSON que se enviará
         System.out.println("JSON enviado: " + jsonInput);

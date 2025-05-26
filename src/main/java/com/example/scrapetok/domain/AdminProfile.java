@@ -3,6 +3,8 @@ package com.example.scrapetok.domain;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -10,8 +12,11 @@ import java.util.List;
 
 @Entity
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+
 public class AdminProfile {
     @Id
+    @EqualsAndHashCode.Include
     private Long id;
     @OneToOne
     @MapsId // indica que usa la misma clave que GeneralAccount

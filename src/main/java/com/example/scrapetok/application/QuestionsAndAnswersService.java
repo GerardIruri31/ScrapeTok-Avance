@@ -83,8 +83,10 @@ public class QuestionsAndAnswersService {
         ZonedDateTime zonedDateTime = obtenerFechaYHoraDePeru();
         questAndAnswer.setAnswerDate(zonedDateTime.toLocalDate());
         questAndAnswer.setAnswerHour(zonedDateTime.toLocalTime().withNano(0));
-
         QuestAndAnswer saved = questionAndAnswerRepository.save(questAndAnswer);
+        Integer answerMade = admin.getTotalQuestionsAnswered();
+        admin.setTotalQuestionsAnswered(answerMade + 1);
+        adminProfileRepository.save(admin);
         return modelMapper.map(saved, FullAnswerQuestionResponseDTO.class);
     }
 

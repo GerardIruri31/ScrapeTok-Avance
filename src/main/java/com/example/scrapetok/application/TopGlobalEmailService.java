@@ -33,7 +33,7 @@ public class TopGlobalEmailService {
     private ApplicationEventPublisher applicationEventPublisher;
 
     public void sendTopGlobalTextEmail(List<TopGlobalEmailDTO> posts) throws EntityNotFoundException, IllegalArgumentException {
-        String subject = "🌍 Today’s Top Global TikTok Hits by Hashtag";
+        String subject = "ScrapeTok: 🌍 Today’s Top Global TikTok Hits by Hashtag / KeyWord";
         StringBuilder body = new StringBuilder();
         body.append("Hello!\n\n");
         body.append("Here are today's top viral TikToks by hashtag. Discover what’s trending globally now:\n\n");
@@ -49,7 +49,7 @@ public class TopGlobalEmailService {
             body.append("------------------------------------------------------------\n\n");
         }
 
-        body.append("This summary is generated automatically based on top-performing global content.\n");
+        body.append("This summary is generated automatically based on latest top-performing global content.\n");
         body.append("Your ScrapeTok Team");
 
         Long adminId = posts.get(0).getAdminId();
@@ -58,10 +58,13 @@ public class TopGlobalEmailService {
         DailyAlerts alert = new DailyAlerts();
         alert.setUserEmails(new HashSet<>(users));
         alert.setAdmin(admin);
+        alert.setSubject(subject);
+        alert.setBody(body.toString());
         ZonedDateTime zonedDateTime = obtenerFechaYHoraDePeru();
         alert.setPostedDate(zonedDateTime.toLocalDate());
         alert.setPostedTime(zonedDateTime.toLocalTime().withNano(0));
         dailyAlertsRepository.save(alert);
+        adminProfileRepository.save(admin);
 
         // Dividir en batches de 50 usuarios
         List<List<GeneralAccount>> batches = Lists.partition(users,50);

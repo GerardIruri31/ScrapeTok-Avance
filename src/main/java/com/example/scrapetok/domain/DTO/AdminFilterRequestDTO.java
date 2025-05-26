@@ -9,6 +9,7 @@ public class AdminFilterRequestDTO {
     @NotNull
     private Long adminId;
     // Separador en string -> ','
-    @NotBlank
     private String hashtags;
+    // Separador en string -> ','
+    private String keyWords;
 }

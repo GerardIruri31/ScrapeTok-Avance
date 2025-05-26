@@ -11,13 +11,15 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Data
-@EqualsAndHashCode(exclude = "historial")
+//@EqualsAndHashCode(exclude = "historial")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
 @Entity
 public class GeneralAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
+    @EqualsAndHashCode.Include
     private Long id;
     @Column(nullable = false, unique = true)
     private String email;
