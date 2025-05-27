@@ -9,10 +9,17 @@ import com.example.scrapetok.exception.EmailAlreadyInUseException;
 import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.GeneralAccountRepository;
+import com.example.scrapetok.security.JwtUtil;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.ZoneId;
@@ -27,9 +34,17 @@ public class AuthorizationService {
     private GeneralAccountRepository generalAccountRepository;
     @Autowired
     private AdminProfileRepository adminProfileRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private AuthenticationManager authManager;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public UserSignUpResponseDTO createUser(UserSignUpRequestDTO request) {
         GeneralAccount newUser = modelMapper.map(request, GeneralAccount.class);
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+
         ZonedDateTime zonedDateTime = obtenerFechaPeru();
         newUser.setCreationDate(zonedDateTime.toLocalDate());
         UserApifyCallHistorial historial = new UserApifyCallHistorial();
@@ -47,6 +62,7 @@ public class AuthorizationService {
 
     public AdminSystemResponseDTO createAdmin(UserSignUpRequestDTO request) {
         GeneralAccount newUser = modelMapper.map(request, GeneralAccount.class);
+        newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         newUser.setRole(Role.ADMIN);
         ZonedDateTime zonedDateTime = obtenerFechaPeru();
         newUser.setCreationDate(zonedDateTime.toLocalDate());
@@ -94,6 +110,29 @@ public class AuthorizationService {
         modelMapper.map(nuevoAdmin, responseDTO);
         return responseDTO;
     }
+
+    public LoginResponseDTO login(LoginRequestDTO request) {
+        try {
+            Authentication authentication = authManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            String role = userDetails.getAuthorities().stream()
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("No role found"))
+                    .getAuthority()
+                    .replace("ROLE_", "");
+
+            String token = jwtUtil.generateToken(userDetails.getUsername(), role);
+            return new LoginResponseDTO(token, role);
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Credenciales inválidas");
+        } catch (Exception e) {
+            throw new RuntimeException("Error interno al autenticar: " + e.getMessage());
+        }
+    }
+
 
     private ZonedDateTime obtenerFechaPeru() {
         return ZonedDateTime.now(ZoneId.of("America/Lima"));
