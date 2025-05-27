@@ -10,18 +10,19 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@PreAuthorize("hasRole('USER')")
 @RequestMapping("/user")
 public class QuestionsController {
     @Autowired
     private QuestionsAndAnswersService questionsAndAnswersService;
 
     @PostMapping("/createQuestion")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> makeQuestion(@RequestBody @Valid UserQuestionRequestDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(questionsAndAnswersService.assignQuestion(request));
     };
 
     @GetMapping("/getAllQuestions")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     public ResponseEntity<?> getAllQuestion() {
         return ResponseEntity.status(HttpStatus.OK).body(questionsAndAnswersService.getQuestions());
     };
