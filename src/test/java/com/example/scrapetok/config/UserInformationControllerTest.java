@@ -74,5 +74,4 @@ public class UserInformationControllerTest {
                 .andExpect(jsonPath("$.error").value("NOT_FOUND"))  // error genérico
                 .andExpect(jsonPath("$.message").value("User with id Not Found"));  // mensaje personalizado
     }
-
 }
