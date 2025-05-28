@@ -11,6 +11,7 @@ import com.example.scrapetok.repository.AdminProfileRepository;
 import com.example.scrapetok.repository.AdminTikTokMetricsRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 @Transactional
 @Service
 public class AdminApifyCallService {
+    @Value("${apify.token}")
+    private String apifyToken;
     @Autowired
     private ApifyServerConnection apifyServerConnection;
     @Autowired
@@ -38,7 +41,6 @@ public class AdminApifyCallService {
             // Hacer llamado a APIFY
             Map<String, Object> jsonInput = new HashMap<>();
             // TOKEN ADMINISTRADOR DE APIFY
-            String apifyToken = "apify_api_89Xx79YhvkBxEWUnnAyVuQpsolqN943YHcqo";
             jsonInput.put("apifyToken", apifyToken);
             jsonInput.put("excludePinnedPosts", true);
             // Por defecto, ADMIN scrapea 20 videos por hashtags

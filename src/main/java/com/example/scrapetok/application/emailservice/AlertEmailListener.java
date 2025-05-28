@@ -18,4 +18,13 @@ public class AlertEmailListener {
         emailService.sendEmail(alertEmailEvent.getEmail(), alertEmailEvent.getSubject(), alertEmailEvent.getBody());
     }
 
+    @Async("welcomeEventExecutor")
+    @EventListener
+    public void sendWelcomeEmail(WelcomeEmailEvent welcomeEmailEvent) {
+        emailService.sendEmail(welcomeEmailEvent.getEmail(), welcomeEmailEvent.getSubject(), welcomeEmailEvent.getBody());
+    }
+
+
+
+
 }
