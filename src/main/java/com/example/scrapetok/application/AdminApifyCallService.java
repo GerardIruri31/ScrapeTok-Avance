@@ -4,13 +4,14 @@ import com.example.scrapetok.application.apifyservice.ApifyServerConnection;
 import com.example.scrapetok.application.apifyservice.JsonProcessor;
 import com.example.scrapetok.domain.AdminProfile;
 import com.example.scrapetok.domain.DTO.AdminFilterRequestDTO;
-import com.example.scrapetok.domain.DTO.HashtagTrendDTO;
 import com.example.scrapetok.exception.ApifyConnectionException;
 import com.example.scrapetok.exception.ResourceNotFoundException;
 import com.example.scrapetok.exception.ServiceUnavailableException;
 import com.example.scrapetok.repository.AdminProfileRepository;
+import com.example.scrapetok.repository.AdminTikTokMetricsRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -20,12 +21,16 @@ import java.util.stream.Collectors;
 @Transactional
 @Service
 public class AdminApifyCallService {
+    @Value("${apify.token}")
+    private String apifyToken;
     @Autowired
     private ApifyServerConnection apifyServerConnection;
     @Autowired
     private JsonProcessor jsonProcessor;
     @Autowired
     private AdminProfileRepository adminProfileRepository;
+    @Autowired
+    private AdminTikTokMetricsRepository adminTikTokMetricsRepository;
 
     public List<Object> apifyconnection(AdminFilterRequestDTO request) throws Exception {
         try {
@@ -36,7 +41,6 @@ public class AdminApifyCallService {
             // Hacer llamado a APIFY
             Map<String, Object> jsonInput = new HashMap<>();
             // TOKEN ADMINISTRADOR DE APIFY
-            String apifyToken = "apify_api_89Xx79YhvkBxEWUnnAyVuQpsolqN943YHcqo";
             jsonInput.put("apifyToken", apifyToken);
             jsonInput.put("excludePinnedPosts", true);
             // Por defecto, ADMIN scrapea 20 videos por hashtags
@@ -73,7 +77,20 @@ public class AdminApifyCallService {
             List<Map<String, Object>> data = jsonProcessor.processJson(ApifyResponse, admin);
             dataSet.add(data);
 
-            // CONSULTAS SQL A DATA RECIÉN GUARDADA
+            // CONSULTAS SQL A DATOS MÁS RECIENTES GUARDADOS DÍA DE HOY OBTENIDO POR ADMIN -> PROTOCOLO CUANDO ADMIN HACE SCRAPEO GENERAL
+            List<AdminTikTokMetricsRepository.RegionVideoCount> resultados = adminTikTokMetricsRepository.countTodayRecentVideosByRegion();
+            dataSet.add(resultados);
+
+            List<AdminTikTokMetricsRepository.HashtagViewCount> obtenerVistasPorHashtagHoy = adminTikTokMetricsRepository.countTodayViewsByHashtag();
+            dataSet.add(obtenerVistasPorHashtagHoy);
+
+            List<AdminTikTokMetricsRepository.SoundViewCount> ViewsVsIdSound = adminTikTokMetricsRepository.countTodayViewsBySound();
+            dataSet.add(ViewsVsIdSound);
+
+            List<AdminTikTokMetricsRepository.RegionMetricsCount> RegionVsCount = adminTikTokMetricsRepository.countTodayViewsAndLikesByRegion();
+            dataSet.add(RegionVsCount);
+
+
             /*List<Map<String,Object>> usernameVsViews = adminTikTokMetricsRepository.findViewsGroupedByUsernameForToday();
             List<Map<String,Object>> musicIdVsViews = adminTikTokMetricsRepository.findViewsGroupedByMusicIdForToday();
             List<Map<String,Object>> DatePostVsViews = adminTikTokMetricsRepository.findViewsGroupedByPostDateTrackedToday();

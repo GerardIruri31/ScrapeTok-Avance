@@ -13,6 +13,7 @@ import com.example.scrapetok.repository.UserApifyFilterRepository;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserApifyCallService {
+    @Value("${apify.token}")
+    private String apifyToken;
     @Autowired
     private UserApifyFilterRepository userApifyFilterRepository;
     @Autowired
@@ -56,7 +59,6 @@ public class UserApifyCallService {
         // Hacer llamado a APIFY
         Map<String, Object> jsonInput = new HashMap<>();
         // TOKEN ADMINISTRADOR DE APIFY
-        String apifyToken = "apify_api_89Xx79YhvkBxEWUnnAyVuQpsolqN943YHcqo";
         jsonInput.put("apifyToken", apifyToken);
         jsonInput.put("excludePinnedPosts", true);
         jsonInput.put("resultsPerPage", request.getNlastPostByHashtags());
