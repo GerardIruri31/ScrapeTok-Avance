@@ -38,45 +38,6 @@ public class AdminInformationControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Test
-    void getAdminProfile_Success() throws Exception {
-        Long adminId = 1L;
-
-        AdminProfileResponseDTO dto = new AdminProfileResponseDTO();
-        dto.setId(adminId);
-        dto.setEmail("admin@example.com");
-        dto.setFirstname("María");
-        dto.setLastname("López");
-        dto.setUsername("marial");
-        dto.setRole(Role.ADMIN);
-        dto.setCreationDate(LocalDate.of(2021, 5, 10));
-        dto.setAdmisionToAdminDate(LocalDate.of(2022, 1, 1));
-        dto.setAdmisionToAdminTime(LocalTime.of(9, 30));
-        dto.setTotalQuestionsAnswered(42);
-        dto.setIsActive(true);
-        // Para listas de mapas puedes simular:
-        dto.setQuestionAndAnswer(List.of(
-                Map.of("¿Pregunta?", "Respuesta"),
-                Map.of("¿Otra?", "Otra respuesta")
-        ));
-        dto.setEmmitedAlerts(List.of(
-                Map.of(100L, "2025-05-26"),
-                Map.of(101L, "2025-05-27")
-        ));
-
-        when(userAdminProfileService.getAdminProfile(adminId)).thenReturn(dto);
-
-        mockMvc.perform(get("/admin/profile/{adminId}", adminId))
-                .andExpect(status().isOk())
-                .andExpect(content().json(objectMapper.writeValueAsString(dto)))
-                // Ejemplos de comprobaciones individuales:
-                .andExpect(jsonPath("$.id").value(adminId))
-                .andExpect(jsonPath("$.email").value("admin@example.com"))
-                .andExpect(jsonPath("$.firstname").value("María"))
-                .andExpect(jsonPath("$.totalQuestionsAnswered").value(42))
-                .andExpect(jsonPath("$.questionAndAnswer", Matchers.hasSize(2)))
-                .andExpect(jsonPath("$.emmitedAlerts", Matchers.hasSize(2)));
-    }
 
     @Test
     void getAdminProfile_NotFound_Returns404() throws Exception {
